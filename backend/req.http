@@ -3,8 +3,8 @@ POST http://localhost:5000/api/common/register
 Content-Type: application/json
 
 {
-    "username": "Subhash",
-    "email": "subhash@gmail.com",
+    "username": "Subhash_Kumar",
+    "email": "subhashkumar@gmail.com",
     "password": "12345678"
 }
 
@@ -13,14 +13,14 @@ POST http://localhost:5000/api/common/login
 Content-Type: application/json
 
 {
-    "email": "subhash@gmail.com",
+    "email": "subhashkumar@gmail.com",
     "password": "12345678"
 }
 
 ###get authenticated user
 GET http://localhost:5000/api/common/user
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjhlNjUxZjY2NGFhZTczMGE4NjJkYyIsImlhdCI6MTc3MzcyNjYwOCwiZXhwIjoxNzc0MzMxNDA4fQ.VybyIVg2lnOio3zEoPHSUXwCDX33dT8NZ_9Wy5hdupI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
 
 ###logout user
 POST http://localhost:5000/api/common/logout
@@ -31,90 +31,113 @@ Content-Type: application/json
 ###get home feed
 GET http://localhost:5000/api/posts
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjhlNjUxZjY2NGFhZTczMGE4NjJkYyIsImlhdCI6MTc3MzcyNjY5MywiZXhwIjoxNzc0MzMxNDkzfQ.6O9BHzWsh6RaJ9D7n4lAlMOvJAYH_hzf-Tpmpnf9PFk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
+
 ###get all posts by user
-GET http://localhost:5000/api/posts/user/69b8e651f664aae730a862dc
+GET http://localhost:5000/api/posts/user/69b910470da666b2a2b052f8
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjhlNjUxZjY2NGFhZTczMGE4NjJkYyIsImlhdCI6MTc3MzcyNjY5MywiZXhwIjoxNzc0MzMxNDkzfQ.6O9BHzWsh6RaJ9D7n4lAlMOvJAYH_hzf-Tpmpnf9PFk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
 
 ###get single post
-GET http://localhost:5000/api/posts/69b8edee7375f610b074695a
+GET http://localhost:5000/api/posts/69b9126b0da666b2a2b052fc
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjhlNjUxZjY2NGFhZTczMGE4NjJkYyIsImlhdCI6MTc3MzcyNjk2NiwiZXhwIjoxNzc0MzMxNzY2fQ.VerNBjg6mfD_sPLJ-oblSByfuTtQwhjU_1tgsahxpi8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
 
 ###create post
 POST http://localhost:5000/api/posts
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjhlNjUxZjY2NGFhZTczMGE4NjJkYyIsImlhdCI6MTc3MzcyNjk2NiwiZXhwIjoxNzc0MzMxNzY2fQ.VerNBjg6mfD_sPLJ-oblSByfuTtQwhjU_1tgsahxpi8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
 
 {
-    "content": "Hello world, this is my first post!"
+    "content": "Hello world, this is my first post with the new account!"
 }
 
 ###like or unlike post (toggle)
-POST http://localhost:5000/api/posts/69b8edee7375f610b074695a/like
+POST http://localhost:5000/api/posts/69b9126b0da666b2a2b052fc/like
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjhlNjUxZjY2NGFhZTczMGE4NjJkYyIsImlhdCI6MTc3MzcyNjk2NiwiZXhwIjoxNzc0MzMxNzY2fQ.VerNBjg6mfD_sPLJ-oblSByfuTtQwhjU_1tgsahxpi8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
 
 ###soft delete post
-DELETE http://localhost:5000/api/posts/REPLACE_WITH_POST_ID
+PATCH http://localhost:5000/api/posts/69b9126b0da666b2a2b052fc
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
 
 # ── COMMENTS ─────────────────────────────────────────────────────────────────
 
 ###get comments for a post
-GET http://localhost:5000/api/comments/REPLACE_WITH_POST_ID
+GET http://localhost:5000/api/comments/69b9126b0da666b2a2b052fc
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
 
 ###add comment to a post
-POST http://localhost:5000/api/comments/REPLACE_WITH_POST_ID
+POST http://localhost:5000/api/comments/69b9126b0da666b2a2b052fc
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
 
 {
     "text": "Great post!"
 }
 
-###delete comment
-DELETE http://localhost:5000/api/comments/REPLACE_WITH_COMMENT_ID
+###soft delete comment
+PATCH http://localhost:5000/api/comments/REPLACE_WITH_COMMENT_ID
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
 
 # ── USERS ─────────────────────────────────────────────────────────────────────
 
 ###get user by id
-GET http://localhost:5000/api/users/69b8e651f664aae730a862dc
+GET http://localhost:5000/api/users/69b910470da666b2a2b052f8
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
 
 ###search user
 GET http://localhost:5000/api/users/search?q=subhash
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
 
 ###update user
-PUT http://localhost:5000/api/users/69b8e651f664aae730a862dc
+PUT http://localhost:5000/api/users/69b910470da666b2a2b052f8
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
 
 {
-    "username": "Subhash",
-    "bio": "Hello, I am Subhash!"
+    "username": "Subhash_Kumar",
+    "bio": "Hello, I am Subhash! This is my Verse App social media platform"
 }
 
 ###follow or unfollow user (toggle)
-POST http://localhost:5000/api/users/REPLACE_WITH_USER_ID/follow
+POST http://localhost:5000/api/users/69b8e651f664aae730a862dc/follow
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
 
 ###get following list
-GET http://localhost:5000/api/users/69b8e651f664aae730a862dc/following
+GET http://localhost:5000/api/users/69b910470da666b2a2b052f8/following
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
 
 ###get followers list
-GET http://localhost:5000/api/users/69b8e651f664aae730a862dc/followers
+GET http://localhost:5000/api/users/69b910470da666b2a2b052f8/followers
 Content-Type: application/json
-Authorization: Bearer <token>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
+
+# ── ARCHIVES (Soft Deleted Items) ────────────────────────────────────────────
+
+###get archived posts
+GET http://localhost:5000/api/posts/archives/user
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
+
+###restore post
+PATCH http://localhost:5000/api/posts/69b9126b0da666b2a2b052fc/restore
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
+
+###get archived comments
+GET http://localhost:5000/api/comments/archives/user
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk
+
+###restore comment
+PATCH http://localhost:5000/api/comments/REPLACE_WITH_COMMENT_ID/restore
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjkxMDQ3MGRhNjY2YjJhMmIwNTJmOCIsImlhdCI6MTc3MzczNjAxNCwiZXhwIjoxNzczODIyNDE0fQ.yxZKC_tw9Y8RGUvkp_ch7uTAx0LR5dfsEYH_XeGm2Wk

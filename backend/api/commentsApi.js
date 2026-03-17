@@ -40,7 +40,7 @@ commentApp.post('/:postId', protect, async (req, res, next) => {
 })
 
 // soft delete comment (protected — author only)
-commentApp.delete('/:id', protect, async (req, res, next) => {
+commentApp.patch('/:id', protect, async (req, res, next) => {
   try {
     const comment = await Comment.findById(req.params.id)
     if (!comment || comment.isDeleted) {
@@ -54,5 +54,34 @@ commentApp.delete('/:id', protect, async (req, res, next) => {
     await comment.save()
     await Post.findByIdAndUpdate(comment.post, { $inc: { commentsCount: -1 } })
     res.status(200).json({ message: 'comment deleted' })
+  } catch (err) { next(err) }
+})
+
+// get archived comments (protected — author only)
+commentApp.get('/archives/user', protect, async (req, res, next) => {
+  try {
+    const archivedComments = await Comment.find({ author: req.user._id, isDeleted: true })
+      .sort({ updatedAt: -1 })
+      .populate('post', 'content')
+      .populate('author', 'username profilePicture')
+    res.status(200).json({ message: 'archived comments fetched', payload: archivedComments })
+  } catch (err) { next(err) }
+})
+
+// restore soft deleted comment (protected — author only)
+commentApp.patch('/:id/restore', protect, async (req, res, next) => {
+  try {
+    const comment = await Comment.findById(req.params.id)
+    if (!comment || !comment.isDeleted) {
+      return res.status(404).json({ message: 'Archived comment not found' })
+    }
+    if (comment.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to restore this comment' })
+    }
+    // restore — unhide from queries
+    comment.isDeleted = false
+    await comment.save()
+    await Post.findByIdAndUpdate(comment.post, { $inc: { commentsCount: 1 } })
+    res.status(200).json({ message: 'comment restored', payload: comment })
   } catch (err) { next(err) }
 })

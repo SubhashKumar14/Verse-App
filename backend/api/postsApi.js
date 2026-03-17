@@ -73,7 +73,7 @@ postApp.post('/', protect, upload.single('image'), async (req, res, next) => {
 })
 
 // soft delete post (protected — owner only)
-postApp.delete('/:id', protect, async (req, res, next) => {
+postApp.patch('/:id', protect, async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.id)
     if (!post || post.isDeleted) return res.status(404).json({ message: 'Post not found' })
@@ -105,5 +105,31 @@ postApp.post('/:id/like', protect, async (req, res, next) => {
       liked:      !alreadyLiked,
       likesCount: post.likes.length,
     })
+  } catch (err) { next(err) }
+})
+
+// get archived posts (protected — owner only)
+postApp.get('/archives/user', protect, async (req, res, next) => {
+  try {
+    const archivedPosts = await Post.find({ author: req.user._id, isDeleted: true })
+      .sort({ updatedAt: -1 })
+      .populate('author', 'username profilePicture')
+    res.status(200).json({ message: 'archived posts fetched', payload: archivedPosts })
+  } catch (err) { next(err) }
+})
+
+// restore soft deleted post (protected — owner only)
+postApp.patch('/:id/restore', protect, async (req, res, next) => {
+  try {
+    const post = await Post.findById(req.params.id)
+    if (!post || !post.isDeleted) return res.status(404).json({ message: 'Archived post not found' })
+    if (post.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to restore this post' })
+    }
+    // restore — unhide from queries
+    post.isDeleted = false
+    await post.save()
+    await User.findByIdAndUpdate(req.user._id, { $inc: { postsCount: 1 } })
+    res.status(200).json({ message: 'post restored', payload: post })
   } catch (err) { next(err) }
 })

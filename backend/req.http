@@ -1,0 +1,120 @@
+###register user
+POST http://localhost:5000/api/common/register
+Content-Type: application/json
+
+{
+    "username": "Subhash",
+    "email": "subhash@gmail.com",
+    "password": "12345678"
+}
+
+###login user
+POST http://localhost:5000/api/common/login
+Content-Type: application/json
+
+{
+    "email": "subhash@gmail.com",
+    "password": "12345678"
+}
+
+###get authenticated user
+GET http://localhost:5000/api/common/user
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjhlNjUxZjY2NGFhZTczMGE4NjJkYyIsImlhdCI6MTc3MzcyNjYwOCwiZXhwIjoxNzc0MzMxNDA4fQ.VybyIVg2lnOio3zEoPHSUXwCDX33dT8NZ_9Wy5hdupI
+
+###logout user
+POST http://localhost:5000/api/common/logout
+Content-Type: application/json
+
+# ── POSTS ────────────────────────────────────────────────────────────────────
+
+###get home feed
+GET http://localhost:5000/api/posts
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjhlNjUxZjY2NGFhZTczMGE4NjJkYyIsImlhdCI6MTc3MzcyNjY5MywiZXhwIjoxNzc0MzMxNDkzfQ.6O9BHzWsh6RaJ9D7n4lAlMOvJAYH_hzf-Tpmpnf9PFk
+###get all posts by user
+GET http://localhost:5000/api/posts/user/69b8e651f664aae730a862dc
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjhlNjUxZjY2NGFhZTczMGE4NjJkYyIsImlhdCI6MTc3MzcyNjY5MywiZXhwIjoxNzc0MzMxNDkzfQ.6O9BHzWsh6RaJ9D7n4lAlMOvJAYH_hzf-Tpmpnf9PFk
+
+###get single post
+GET http://localhost:5000/api/posts/69b8edee7375f610b074695a
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjhlNjUxZjY2NGFhZTczMGE4NjJkYyIsImlhdCI6MTc3MzcyNjk2NiwiZXhwIjoxNzc0MzMxNzY2fQ.VerNBjg6mfD_sPLJ-oblSByfuTtQwhjU_1tgsahxpi8
+
+###create post
+POST http://localhost:5000/api/posts
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjhlNjUxZjY2NGFhZTczMGE4NjJkYyIsImlhdCI6MTc3MzcyNjk2NiwiZXhwIjoxNzc0MzMxNzY2fQ.VerNBjg6mfD_sPLJ-oblSByfuTtQwhjU_1tgsahxpi8
+
+{
+    "content": "Hello world, this is my first post!"
+}
+
+###like or unlike post (toggle)
+POST http://localhost:5000/api/posts/69b8edee7375f610b074695a/like
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjhlNjUxZjY2NGFhZTczMGE4NjJkYyIsImlhdCI6MTc3MzcyNjk2NiwiZXhwIjoxNzc0MzMxNzY2fQ.VerNBjg6mfD_sPLJ-oblSByfuTtQwhjU_1tgsahxpi8
+
+###soft delete post
+DELETE http://localhost:5000/api/posts/REPLACE_WITH_POST_ID
+Content-Type: application/json
+Authorization: Bearer <token>
+
+# ── COMMENTS ─────────────────────────────────────────────────────────────────
+
+###get comments for a post
+GET http://localhost:5000/api/comments/REPLACE_WITH_POST_ID
+Content-Type: application/json
+Authorization: Bearer <token>
+
+###add comment to a post
+POST http://localhost:5000/api/comments/REPLACE_WITH_POST_ID
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+    "text": "Great post!"
+}
+
+###delete comment
+DELETE http://localhost:5000/api/comments/REPLACE_WITH_COMMENT_ID
+Content-Type: application/json
+Authorization: Bearer <token>
+
+# ── USERS ─────────────────────────────────────────────────────────────────────
+
+###get user by id
+GET http://localhost:5000/api/users/69b8e651f664aae730a862dc
+Content-Type: application/json
+Authorization: Bearer <token>
+
+###search user
+GET http://localhost:5000/api/users/search?q=subhash
+Content-Type: application/json
+Authorization: Bearer <token>
+
+###update user
+PUT http://localhost:5000/api/users/69b8e651f664aae730a862dc
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+    "username": "Subhash",
+    "bio": "Hello, I am Subhash!"
+}
+
+###follow or unfollow user (toggle)
+POST http://localhost:5000/api/users/REPLACE_WITH_USER_ID/follow
+Content-Type: application/json
+Authorization: Bearer <token>
+
+###get following list
+GET http://localhost:5000/api/users/69b8e651f664aae730a862dc/following
+Content-Type: application/json
+Authorization: Bearer <token>
+
+###get followers list
+GET http://localhost:5000/api/users/69b8e651f664aae730a862dc/followers
+Content-Type: application/json
+Authorization: Bearer <token>

@@ -8,17 +8,21 @@ export const userApp = express.Router()
 userApp.get('/search', protect, async (req, res, next) => {
   try {
     const query = req.query.q
+    let users = []
+
     if (!query) {
-      return res.status(400).json({ message: 'Search query is required' })
+      // If no query, return some users as recommendations
+      users = await User.find({ _id: { $ne: req.user._id } }).limit(5)
+    } else {
+      // case-insensitive search on username or email, exclude current user
+      users = await User.find({
+        $or: [
+          { username: { $regex: query, $options: 'i' } },
+          { email:    { $regex: query, $options: 'i' } },
+        ],
+        _id: { $ne: req.user._id },
+      }).limit(20)
     }
-    // case-insensitive search on username or email, exclude current user
-    const users = await User.find({
-      $or: [
-        { username: { $regex: query, $options: 'i' } },
-        { email:    { $regex: query, $options: 'i' } },
-      ],
-      _id: { $ne: req.user._id },
-    }).limit(20)
     res.status(200).json({ message: 'search results', payload: users })
   } catch (err) { next(err) }
 })

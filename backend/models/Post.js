@@ -10,7 +10,7 @@ const postSchema = new mongoose.Schema(
 
     content: {
       type:      String,
-      required:  [true, 'Post content is required'],
+      required:  function() { return !this.imageUrl; }, // Content is required only if there is no image
       trim:      true,
       maxlength: [280, 'Post cannot exceed 280 characters'],
     },

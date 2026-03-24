@@ -19,6 +19,13 @@ app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173' }))
 app.use(express.json())                        // parse JSON request bodies
 app.use(express.urlencoded({ extended: true })) // parse form data
 
+// Serve uploads folder statically
+import path from 'path'
+import { fileURLToPath } from 'url'
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+
 // ─── Routes ──────────────────────────────────────────────────────────────
 app.use('/api/users',    userApp)
 app.use('/api/posts',    postApp)

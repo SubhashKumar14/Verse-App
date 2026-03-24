@@ -62,10 +62,23 @@ postApp.get('/:id', protect, async (req, res, next) => {
 postApp.post('/', protect, upload.single('image'), async (req, res, next) => {
   try {
     const { content } = req.body
-    if (!content || content.trim() === '') {
-      return res.status(400).json({ message: 'Post content is required' })
+    if ((!content || content.trim() === '') && !req.file) {
+      return res.status(400).json({ message: 'Post content or image is required' })
     }
-    const post = await Post.create({ author: req.user._id, content: content.trim() })
+    
+    // Check if image was uploaded locally
+    let imageUrl = null
+    if (req.file) {
+      // Local path convention
+      imageUrl = `/uploads/${req.file.filename}`
+    }
+
+    const post = await Post.create({ 
+      author: req.user._id, 
+      content: content ? content.trim() : '',
+      imageUrl 
+    })
+    
     await User.findByIdAndUpdate(req.user._id, { $inc: { postsCount: 1 } })
     const populatedPost = await post.populate('author', 'username profilePicture')
     res.status(201).json({ message: 'post created', payload: populatedPost })

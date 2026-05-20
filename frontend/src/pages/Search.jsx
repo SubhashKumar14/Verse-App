@@ -4,7 +4,8 @@ import { searchUsers } from '../services/userService'
 import UserCard from '../components/users/UserCard'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import EmptyState from '../components/common/EmptyState'
-import { pageTitleClass, inputClass } from '../styles/common'
+import { HiSearch } from 'react-icons/hi'
+import { pageTitleClass } from '../styles/common'
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -40,30 +41,36 @@ const Search = () => {
 
   return (
     <div>
-      <h1 className={pageTitleClass}>Explore</h1>
+      <h1 className={`${pageTitleClass} [text-wrap:balance]`}>Explore</h1>
 
-      <form onSubmit={handleSearch} className="mb-6">
+      <form onSubmit={handleSearch} className="mb-10 mt-6 relative">
+        <HiSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-[color:var(--muted)] text-xl" />
         <input
           type="text"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          placeholder="Search by username or email..."
-          className={inputClass}
+          placeholder="Search people..."
+          className="w-full bg-transparent border-0 border-b border-[color:var(--border)] focus:border-[color:var(--accent)] focus:outline-none focus:ring-0 pl-10 pr-4 py-3 text-lg text-[color:var(--text)] placeholder-[color:var(--muted)] transition-colors duration-200"
         />
       </form>
 
       {loading ? (
         <LoadingSpinner />
       ) : results.length > 0 ? (
-        <div className="space-y-1">
-          {results.map((u) => (
-            <UserCard key={u._id} userData={u} />
-          ))}
+        <div>
+          <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[color:var(--muted)] px-3 mb-3">
+            People
+          </h2>
+          <div className="space-y-0.5">
+            {results.map((u) => (
+              <UserCard key={u._id} userData={u} />
+            ))}
+          </div>
         </div>
       ) : searched ? (
-        <EmptyState icon="🔍" message={`No users found for "${query}"`} />
+        <EmptyState icon="✦" message={`No one found for "${query}"`} />
       ) : (
-        <EmptyState icon="👥" message="Search for users to connect with" />
+        <EmptyState icon="✦" message="Search for people to read." />
       )}
     </div>
   )

@@ -29,18 +29,19 @@ const UserCard = ({ userData, showFollow = true }) => {
   }
 
   return (
-    <Link to={`/profile/${userData._id}`} className={userCard}>
+    <Link to={`/profile/${userData._id}`} className={userCard} aria-label={`View ${userData.username}'s profile`}>
       <div className={userAvatar}>
         {userData.username?.charAt(0).toUpperCase()}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-white truncate">{userData.username}</p>
+        <p className="font-semibold text-[color:var(--text)] truncate">{userData.username}</p>
         {userData.bio && <p className={`${mutedText} truncate`}>{userData.bio}</p>}
       </div>
       {showFollow && !isSelf && (
         <button
           onClick={handleFollow}
           disabled={loading}
+          aria-pressed={following}
           className={`${followBtn} ${following ? followBtnUnfollow : followBtnFollow}`}
         >
           {following ? 'Unfollow' : 'Follow'}

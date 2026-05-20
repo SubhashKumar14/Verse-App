@@ -15,7 +15,7 @@ const Sidebar = () => {
   const { user } = useAuth()
 
   return (
-    <aside className={sidebarClass}>
+    <aside className={sidebarClass} aria-label="Main navigation">
       <div className="space-y-1">
         {links.map((item) => {
           const IconComponent = item.icon

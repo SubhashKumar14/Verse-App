@@ -43,7 +43,7 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
   }
 
   const handleDelete = async () => {
-    if (!confirm('Move this post to archive?')) return
+    if (!confirm('Archive this post?')) return
     setDeleting(true)
     try {
       await softDeletePost(post._id)
@@ -56,10 +56,10 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
   }
 
   return (
-    <div className={postCard}>
+    <div className={`${postCard} group`}>
       {/* Author row */}
       <div className={postAuthorRow}>
-        <Link to={`/profile/${author._id}`} className={postAvatar}>
+        <Link to={`/profile/${author._id}`} className={postAvatar} aria-label={`${author.username}'s profile`}>
           {author.username?.charAt(0).toUpperCase()}
         </Link>
         <div className="flex-1 min-w-0">
@@ -69,8 +69,13 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
           <p className={postTime}>{formatTime(post.createdAt)}</p>
         </div>
         {isOwner && (
-          <button onClick={handleDelete} disabled={deleting} className="text-gray-600 hover:text-red-400 transition-colors cursor-pointer p-1">
-            <HiTrash className="text-lg" />
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            aria-label="Archive post"
+            className="text-[color:var(--muted)] hover:text-[color:var(--danger)] transition-colors duration-150 cursor-pointer p-1 rounded-md -mr-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+          >
+            <HiTrash className="text-base" />
           </button>
         )}
       </div>
@@ -90,10 +95,10 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
           <div className="mt-3">
             {showLink ? (
               <Link to={`/post/${post._id}`}>
-                <img src={post.imageUrl} alt="Post attachment" className="rounded-xl border border-gray-200 dark:border-gray-800/80 w-full object-cover max-h-[500px]" />
+                <img src={post.imageUrl} alt="Post attachment" className="rounded-xl border border-[color:var(--border)] w-full object-cover max-h-125" />
               </Link>
             ) : (
-              <img src={post.imageUrl} alt="Post attachment" className="rounded-xl border border-gray-200 dark:border-gray-800/80 w-full object-cover max-h-[500px]" />
+              <img src={post.imageUrl} alt="Post attachment" className="rounded-xl border border-[color:var(--border)] w-full object-cover max-h-125" />
             )}
           </div>
         )}
@@ -101,12 +106,17 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
 
       {/* Actions */}
       <div className={postActions}>
-        <button onClick={handleLike} className={liked ? postActionBtnActive : postActionBtn}>
-          {liked ? <HiHeart className="text-lg" /> : <HiOutlineHeart className="text-lg" />}
+        <button
+          onClick={handleLike}
+          aria-pressed={liked}
+          aria-label={liked ? 'Unlike post' : 'Like post'}
+          className={liked ? postActionBtnActive : postActionBtn}
+        >
+          {liked ? <HiHeart className="text-base" /> : <HiOutlineHeart className="text-base" />}
           <span>{likesCount}</span>
         </button>
-        <Link to={`/post/${post._id}`} className={postActionBtn}>
-          <HiChat className="text-lg" />
+        <Link to={`/post/${post._id}`} className={postActionBtn} aria-label="View comments">
+          <HiChat className="text-base" />
           <span>{post.commentsCount || 0}</span>
         </Link>
       </div>

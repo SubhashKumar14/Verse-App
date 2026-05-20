@@ -70,7 +70,7 @@ const CommentSection = ({ postId }) => {
 
   return (
     <div className="mt-4">
-      <h3 className="text-sm font-semibold text-gray-400 mb-3">
+      <h3 className="text-sm font-semibold text-[color:var(--muted)] mb-3">
         Comments ({comments.length})
       </h3>
 
@@ -79,7 +79,7 @@ const CommentSection = ({ postId }) => {
         {comments.map((c) => {
           const author = c.author || {}
           return (
-            <div key={c._id} className={commentCard}>
+            <div key={c._id} className={`${commentCard} group`}>
               <div className={commentAvatar}>
                 {author.username?.charAt(0).toUpperCase()}
               </div>
@@ -91,7 +91,11 @@ const CommentSection = ({ postId }) => {
                 <p className={commentText}>{c.text}</p>
               </div>
               {user?._id === author._id && (
-                <button onClick={() => handleDelete(c._id)} className="text-gray-600 hover:text-red-400 transition-colors cursor-pointer p-1 shrink-0">
+                <button
+                  onClick={() => handleDelete(c._id)}
+                  aria-label="Delete comment"
+                  className="text-[color:var(--muted)] hover:text-[color:var(--danger)] transition-colors duration-150 cursor-pointer p-1 shrink-0 rounded-md opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                >
                   <HiTrash className="text-sm" />
                 </button>
               )}
@@ -99,7 +103,7 @@ const CommentSection = ({ postId }) => {
           )
         })}
         {comments.length === 0 && (
-          <p className={mutedText}>No comments yet. Be the first!</p>
+          <p className={`${mutedText} text-sm mt-2`}>No comments yet.</p>
         )}
       </div>
 

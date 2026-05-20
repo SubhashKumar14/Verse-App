@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { updateProfile } from '../services/userService'
 import {
   pageTitleClass, formGroup, labelClass, inputClass,
-  textareaClass, primaryBtn, formError, cardClass, mutedText
+  textareaClass, primaryBtn, dangerBtn, formError, mutedText
 } from '../styles/common'
 import toast from 'react-hot-toast'
 
@@ -42,13 +42,17 @@ const Settings = () => {
   }
 
   return (
-    <div>
-      <h1 className={pageTitleClass}>Settings</h1>
-      <p className={`${mutedText} mb-6`}>Update your profile information</p>
+    <div className="max-w-xl">
+      <h1 className={`${pageTitleClass} [text-wrap:balance]`}>Settings</h1>
+      <p className={`${mutedText} mb-8`}>Manage your account preferences and profile details.</p>
 
-      <div className={cardClass}>
-        <form onSubmit={handleSubmit}>
-          <div className={formGroup}>
+      {/* Public Profile Section */}
+      <section className="mb-12">
+        <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[color:var(--text)] mb-6 border-b border-[color:var(--border)] pb-2">
+          Public Profile
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-1.5">
             <label className={labelClass}>Username</label>
             <input
               type="text"
@@ -59,7 +63,8 @@ const Settings = () => {
             />
             {errors.username && <p className={formError}>{errors.username}</p>}
           </div>
-          <div className={formGroup}>
+
+          <div className="space-y-1.5">
             <label className={labelClass}>Bio</label>
             <textarea
               value={form.bio}
@@ -69,18 +74,39 @@ const Settings = () => {
               rows={4}
               maxLength={160}
             />
-            <div className="flex justify-between items-center mt-1">
+            <div className="flex justify-between items-start mt-1">
               {errors.bio ? (
                 <p className={formError}>{errors.bio}</p>
               ) : <span />}
-              <span className={mutedText}>{form.bio.length}/160</span>
+              <span className={`${mutedText} tabular-nums text-xs font-medium`}>
+                {form.bio.length}/160
+              </span>
             </div>
           </div>
-          <button type="submit" disabled={loading} className={primaryBtn}>
-            {loading ? 'Saving...' : 'Save Changes'}
-          </button>
+
+          <div className="pt-2">
+            <button type="submit" disabled={loading} className={primaryBtn}>
+              {loading ? 'Saving…' : 'Save Changes'}
+            </button>
+          </div>
         </form>
-      </div>
+      </section>
+
+      {/* Danger Zone Section */}
+      <section className="mb-12">
+        <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[color:var(--danger)] mb-6 border-b border-[color:var(--border)] pb-2">
+          Danger Zone
+        </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-[color:color-mix(in_oklab,var(--danger)_30%,var(--border))] bg-[color:color-mix(in_oklab,var(--danger)_5%,transparent)]">
+          <div>
+            <p className="font-semibold text-[color:var(--text)] text-sm">Delete Account</p>
+            <p className="text-xs text-[color:var(--muted)] mt-1">Permanently remove your account and all data.</p>
+          </div>
+          <button className={dangerBtn} type="button" onClick={() => toast.error('Not implemented yet')}>
+            Delete Account
+          </button>
+        </div>
+      </section>
     </div>
   )
 }

@@ -4,7 +4,7 @@ import CreatePost from '../components/posts/CreatePost'
 import PostCard from '../components/posts/PostCard'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import EmptyState from '../components/common/EmptyState'
-import { secondaryBtn, pageTitleClass } from '../styles/common'
+import { pageTitleClass } from '../styles/common'
 
 const Home = () => {
   const [posts, setPosts] = useState([])
@@ -43,27 +43,29 @@ const Home = () => {
 
   return (
     <div>
-      <h1 className={pageTitleClass}>Home</h1>
+      <h1 className={`${pageTitleClass} [text-wrap:balance]`}>Home</h1>
 
-      {/* Create Post */}
-      <div className="mb-6">
-        <CreatePost onPostCreated={handlePostCreated} />
-      </div>
+      {/* Composer */}
+      <CreatePost onPostCreated={handlePostCreated} />
 
       {/* Feed */}
       {loading ? (
         <LoadingSpinner />
       ) : posts.length === 0 ? (
-        <EmptyState icon="📝" message="No posts yet. Create the first one!" />
+        <EmptyState icon="✦" message="Nothing here yet. Write the first thing." />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-0">
           {posts.map((post) => (
             <PostCard key={post._id} post={post} onDelete={handlePostDeleted} />
           ))}
           {hasMore && (
-            <div className="text-center py-4">
-              <button onClick={loadMore} disabled={loadingMore} className={secondaryBtn}>
-                {loadingMore ? 'Loading...' : 'Load More'}
+            <div className="text-center py-6">
+              <button
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="text-sm text-[color:var(--muted)] hover:text-[color:var(--text)] transition-colors duration-150 disabled:opacity-50"
+              >
+                {loadingMore ? 'Loading…' : 'Load more'}
               </button>
             </div>
           )}

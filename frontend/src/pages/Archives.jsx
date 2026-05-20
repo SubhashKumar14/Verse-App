@@ -59,8 +59,8 @@ const Archives = () => {
 
   return (
     <div>
-      <h1 className={pageTitleClass}>Archives</h1>
-      <p className={`${mutedText} mb-4`}>Your soft-deleted posts and comments. Restore them anytime.</p>
+      <h1 className={`${pageTitleClass} [text-wrap:balance]`}>Archives</h1>
+      <p className={`${mutedText} mb-6`}>Your soft-deleted posts and comments. Restore them anytime.</p>
 
       {/* Tabs */}
       <div className={tabsContainer}>
@@ -81,18 +81,18 @@ const Archives = () => {
       {/* Archived Posts */}
       {activeTab === 'posts' && (
         posts.length === 0 ? (
-          <EmptyState icon="📦" message="No archived posts" />
+          <EmptyState icon="✦" message="No archived posts" />
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-0">
             {posts.map((post) => (
               <div key={post._id} className={archiveCard}>
-                <p className={postContent}>{post.content}</p>
+                <p className={`${postContent} opacity-80`}>{post.content}</p>
                 <div className="flex items-center justify-between mt-3">
-                  <span className={mutedText}>
-                    Deleted {new Date(post.updatedAt).toLocaleDateString()}
+                  <span className={`${mutedText} tabular-nums uppercase text-[10px] tracking-wider font-semibold`}>
+                    Archived {new Date(post.updatedAt).toLocaleDateString()}
                   </span>
-                  <button onClick={() => handleRestorePost(post._id)} className={restoreBtn}>
-                    <HiRefresh className="inline mr-1" />
+                  <button onClick={() => handleRestorePost(post._id)} aria-label="Restore post" className={restoreBtn}>
+                    <HiRefresh className="text-sm" />
                     Restore
                   </button>
                 </div>
@@ -105,23 +105,23 @@ const Archives = () => {
       {/* Archived Comments */}
       {activeTab === 'comments' && (
         comments.length === 0 ? (
-          <EmptyState icon="💬" message="No archived comments" />
+          <EmptyState icon="✦" message="No archived comments" />
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-0">
             {comments.map((comment) => (
               <div key={comment._id} className={archiveCard}>
-                <p className="text-gray-300 text-sm">{comment.text}</p>
+                <p className="text-[15px] text-[color:var(--text)] leading-relaxed opacity-80">{comment.text}</p>
                 {comment.post && (
-                  <p className={`${mutedText} mt-1`}>
+                  <p className={`${mutedText} mt-1.5 text-[13px] border-l-2 border-[color:var(--border)] pl-2`}>
                     On: "{comment.post.content?.substring(0, 60)}..."
                   </p>
                 )}
-                <div className="flex items-center justify-between mt-3">
-                  <span className={mutedText}>
-                    Deleted {new Date(comment.updatedAt).toLocaleDateString()}
+                <div className="flex items-center justify-between mt-4">
+                  <span className={`${mutedText} tabular-nums uppercase text-[10px] tracking-wider font-semibold`}>
+                    Archived {new Date(comment.updatedAt).toLocaleDateString()}
                   </span>
-                  <button onClick={() => handleRestoreComment(comment._id)} className={restoreBtn}>
-                    <HiRefresh className="inline mr-1" />
+                  <button onClick={() => handleRestoreComment(comment._id)} aria-label="Restore comment" className={restoreBtn}>
+                    <HiRefresh className="text-sm" />
                     Restore
                   </button>
                 </div>

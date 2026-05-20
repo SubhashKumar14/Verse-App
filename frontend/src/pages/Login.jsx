@@ -47,10 +47,10 @@ const Login = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <img src={logo} alt="VerseLy" className="h-16 mx-auto mb-3" />
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-            VerseLy
+          <h1 className="text-2xl font-semibold tracking-tight text-[color:var(--text)]">
+            <span className="text-[color:var(--accent)]">VerseLy</span>
           </h1>
-          <p className={mutedText}>Share your verse with the world</p>
+          <p className={mutedText}>Share your verse with the world.</p>
         </div>
 
         <div className={formCard}>

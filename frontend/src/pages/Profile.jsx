@@ -63,51 +63,54 @@ const Profile = () => {
   }
 
   if (loading) return <LoadingSpinner />
-  if (!profile) return <EmptyState icon="👤" message="User not found" />
+  if (!profile) return <EmptyState icon="✦" message="User not found" />
 
   return (
     <div>
       {/* Profile Header */}
       <div className={profileHeader}>
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-          <div className={profileAvatar}>
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+          <div className={profileAvatar} aria-hidden="true">
             {profile.username?.charAt(0).toUpperCase()}
           </div>
-          <div className="flex-1 text-center sm:text-left">
-            <h1 className={profileName}>{profile.username}</h1>
+          <div className="flex-1 text-center sm:text-left min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <h1 className={`${profileName} mt-0 [text-wrap:balance]`}>{profile.username}</h1>
+              {!isSelf && (
+                <button
+                  onClick={handleFollow}
+                  aria-pressed={isFollowing}
+                  className={`${followBtn} ${isFollowing ? followBtnUnfollow : followBtnFollow}`}
+                >
+                  {isFollowing ? 'Unfollow' : 'Follow'}
+                </button>
+              )}
+            </div>
             {profile.bio && <p className={profileBio}>{profile.bio}</p>}
-            <div className="flex gap-8 mt-4 justify-center sm:justify-start">
+            <div className="flex gap-6 mt-5 justify-center sm:justify-start">
               <div className={profileStat}>
-                <p className={profileStatNumber}>{profile.postsCount || 0}</p>
-                <p className={profileStatLabel}>Posts</p>
+                <span className={profileStatNumber}>{profile.postsCount || 0}</span>
+                <span className={profileStatLabel}>Posts</span>
               </div>
               <div className={profileStat}>
-                <p className={profileStatNumber}>{profile.followers?.length || profile.followersCount || 0}</p>
-                <p className={profileStatLabel}>Followers</p>
+                <span className={profileStatNumber}>{profile.followers?.length || profile.followersCount || 0}</span>
+                <span className={profileStatLabel}>Followers</span>
               </div>
               <div className={profileStat}>
-                <p className={profileStatNumber}>{profile.following?.length || profile.followingCount || 0}</p>
-                <p className={profileStatLabel}>Following</p>
+                <span className={profileStatNumber}>{profile.following?.length || profile.followingCount || 0}</span>
+                <span className={profileStatLabel}>Following</span>
               </div>
             </div>
           </div>
-          {!isSelf && (
-            <button
-              onClick={handleFollow}
-              className={`${followBtn} ${isFollowing ? followBtnUnfollow : followBtnFollow}`}
-            >
-              {isFollowing ? 'Unfollow' : 'Follow'}
-            </button>
-          )}
         </div>
       </div>
 
       {/* User's Posts */}
-      <h2 className={`${pageTitleClass} text-xl mt-6`}>Posts</h2>
+      <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[color:var(--muted)] px-1 mb-2 mt-6">Posts</h2>
       {posts.length === 0 ? (
-        <EmptyState icon="📝" message="No posts yet" />
+        <EmptyState icon="✦" message="No posts yet" />
       ) : (
-        <div className="space-y-4 mt-4">
+        <div className="space-y-0">
           {posts.map((post) => (
             <PostCard key={post._id} post={post} onDelete={handlePostDeleted} />
           ))}

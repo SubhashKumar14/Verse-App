@@ -6,7 +6,8 @@ import {
   inputClass, submitBtn, formError, formLink, mutedText
 } from '../styles/common'
 import toast from 'react-hot-toast'
-import logo from '../assets/logo.png'
+import VerselyWordmark from '../components/common/VerselyWordmark'
+import logo from '../assets/versely_logo.png'
 
 const Login = () => {
   const { login } = useAuth()
@@ -44,17 +45,17 @@ const Login = () => {
   return (
     <div className={`${pageBackground} flex items-center justify-center`}>
       <div className="w-full max-w-md px-4">
-        {/* Logo */}
+        {/* Brand */}
         <div className="text-center mb-10">
-          <img src={logo} alt="VerseLy" className="h-14 mx-auto mb-4" />
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
-            Welcome back
-          </h1>
+          <div className="flex justify-center mb-4">
+            <img src={logo} alt="VerseLy" className="h-[72px] w-[72px] object-contain" />
+          </div>
+          <VerselyWordmark size="lg" className="block mb-2" />
           <p className={`${mutedText} mt-1`}>Sign in to continue writing.</p>
         </div>
 
         <div className={formCard}>
-          <h2 className={formTitle}>Sign In</h2>
+          <h2 className={formTitle}>Welcome back</h2>
           <form onSubmit={handleSubmit}>
             <div className={formGroup}>
               <label className={labelClass}>Email</label>

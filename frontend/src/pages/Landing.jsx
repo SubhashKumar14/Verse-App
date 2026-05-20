@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { pageBackground, primaryBtn, ghostBtn, bodyText, mutedText, badge } from '../styles/common'
-import logo from '../assets/logo.png'
+import VerselyWordmark from '../components/common/VerselyWordmark'
+import logo from '../assets/versely_logo.png'
 
 const Landing = () => {
   return (
@@ -9,10 +10,8 @@ const Landing = () => {
       {/* ── Navigation ──────────────────────────────────── */}
       <nav className="max-w-6xl mx-auto px-6 sm:px-8 py-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img src={logo} alt="VerseLy" className="h-8 w-8 object-contain" />
-          <span className="text-[16px] font-semibold tracking-tight text-[var(--text)]">
-            VerseLy
-          </span>
+          <img src={logo} alt="VerseLy" className="h-10 w-10 object-contain" />
+          <VerselyWordmark size="lg" />
         </div>
         <div className="flex items-center gap-4">
           <Link
@@ -28,9 +27,14 @@ const Landing = () => {
       </nav>
 
       {/* ── Hero ────────────────────────────────────────── */}
-      <section className="max-w-4xl mx-auto px-6 sm:px-8 pt-16 pb-20 sm:pt-24 sm:pb-28 text-center">
-        <span className={badge}>A calmer social space</span>
-        <h1 className="mt-6 text-[2.75rem] sm:text-[3.75rem] font-bold tracking-tight text-[var(--text)] leading-[1.1]">
+      <section className="max-w-4xl mx-auto px-6 sm:px-8 pt-20 pb-24 sm:pt-28 sm:pb-32 text-center">
+        <div className="flex justify-center mb-10">
+          <img src={logo} alt="VerseLy feather" className="h-24 w-24 object-contain" />
+        </div>
+        <h1
+          className="text-[2.75rem] sm:text-[4rem] font-bold tracking-[-0.04em] text-[var(--text)] leading-[1.05]"
+          style={{ fontFamily: 'var(--font-heading)' }}
+        >
           Write without noise.
         </h1>
         <p className={`${bodyText} mt-6 max-w-xl mx-auto text-[var(--muted)] text-lg leading-relaxed`}>
@@ -53,7 +57,7 @@ const Landing = () => {
       <section className="max-w-2xl mx-auto px-6 sm:px-8 pb-24">
         <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 sm:p-8">
           <div className="flex items-center justify-between mb-6">
-            <p className="text-sm font-semibold text-[var(--text)]">Today</p>
+            <p className="text-sm font-semibold text-[var(--text)]" style={{ fontFamily: 'var(--font-heading)' }}>Today</p>
             <span className="text-xs text-[var(--muted)]">3 updates</span>
           </div>
           <div className="space-y-0">
@@ -82,15 +86,18 @@ const Landing = () => {
       </section>
 
       {/* ── Philosophy ──────────────────────────────────── */}
-      <section id="philosophy" className="max-w-5xl mx-auto px-6 sm:px-8 py-20 sm:py-24">
-        <h2 className="text-[1.75rem] sm:text-[2.25rem] font-bold tracking-tight text-[var(--text)] text-center leading-tight">
+      <section id="philosophy" className="max-w-5xl mx-auto px-6 sm:px-8 py-24 sm:py-28">
+        <h2
+          className="text-[1.75rem] sm:text-[2.5rem] font-bold tracking-[-0.03em] text-[var(--text)] text-center leading-[1.1]"
+          style={{ fontFamily: 'var(--font-heading)' }}
+        >
           Why VerseLy exists
         </h2>
         <p className={`${mutedText} text-center mt-3 max-w-lg mx-auto text-[15px]`}>
           Three principles that shape everything we build.
         </p>
 
-        <div className="grid sm:grid-cols-3 gap-8 sm:gap-12 mt-14">
+        <div className="grid sm:grid-cols-3 gap-8 sm:gap-14 mt-16">
           {[
             {
               title: 'Writing first',
@@ -106,10 +113,13 @@ const Landing = () => {
             },
           ].map((principle) => (
             <div key={principle.title} className="text-center sm:text-left">
-              <h3 className="text-lg font-semibold text-[var(--text)] tracking-tight">
+              <h3
+                className="text-lg font-bold text-[var(--text)] tracking-[-0.02em]"
+                style={{ fontFamily: 'var(--font-heading)' }}
+              >
                 {principle.title}
               </h3>
-              <p className="text-[14px] text-[var(--muted)] mt-2 leading-relaxed">
+              <p className="text-[14px] text-[var(--muted)] mt-2.5 leading-relaxed">
                 {principle.desc}
               </p>
             </div>
@@ -118,20 +128,26 @@ const Landing = () => {
       </section>
 
       {/* ── Archives Feature ────────────────────────────── */}
-      <section className="max-w-4xl mx-auto px-6 sm:px-8 py-20 sm:py-24 text-center">
+      <section className="max-w-4xl mx-auto px-6 sm:px-8 py-24 sm:py-28 text-center">
         <span className={badge}>Archives</span>
-        <h2 className="mt-5 text-[1.75rem] sm:text-[2.25rem] font-bold tracking-tight text-[var(--text)] leading-tight">
+        <h2
+          className="mt-5 text-[1.75rem] sm:text-[2.5rem] font-bold tracking-[-0.03em] text-[var(--text)] leading-[1.1]"
+          style={{ fontFamily: 'var(--font-heading)' }}
+        >
           Never lose a thought
         </h2>
         <p className="text-[15px] text-[var(--muted)] mt-4 max-w-lg mx-auto leading-relaxed">
-          Every post you remove goes to your personal archive — a digital memory vault.
+          Every post you remove goes to your personal archive, a digital memory vault.
           Nothing is truly gone. Restore any thought, anytime, with a single tap.
         </p>
       </section>
 
       {/* ── Final CTA ───────────────────────────────────── */}
-      <section className="max-w-4xl mx-auto px-6 sm:px-8 py-20 sm:py-24 text-center border-t border-[var(--border)]">
-        <h2 className="text-[1.75rem] sm:text-[2.25rem] font-bold tracking-tight text-[var(--text)] leading-tight">
+      <section className="max-w-4xl mx-auto px-6 sm:px-8 py-24 sm:py-28 text-center border-t border-[var(--border)]">
+        <h2
+          className="text-[1.75rem] sm:text-[2.5rem] font-bold tracking-[-0.03em] text-[var(--text)] leading-[1.1]"
+          style={{ fontFamily: 'var(--font-heading)' }}
+        >
           Ready to write?
         </h2>
         <p className="text-[15px] text-[var(--muted)] mt-3 max-w-md mx-auto leading-relaxed">
@@ -145,9 +161,13 @@ const Landing = () => {
       </section>
 
       {/* ── Footer ──────────────────────────────────────── */}
-      <footer className="py-10 text-center">
+      <footer className="py-12 text-center border-t border-[var(--border)]">
+        <div className="flex items-center justify-center gap-2.5 mb-3">
+          <img src={logo} alt="VerseLy" className="h-7 w-7 object-contain" />
+          <VerselyWordmark size="md" accentSuffix={false} />
+        </div>
         <p className="text-xs text-[var(--muted)]">
-          © 2025 VerseLy. A calmer social space.
+          A calmer social space for thoughtful writing.
         </p>
       </footer>
     </div>

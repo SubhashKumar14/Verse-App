@@ -1,10 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { HiLogout } from 'react-icons/hi'
-import logo from '../../assets/logo.png'
+import VerselyWordmark from '../common/VerselyWordmark'
+import logo from '../../assets/versely_logo.png'
 import {
-  navbarClass, navContainerClass, navBrandClass, navBrandText,
-  navLogoClass, iconBtn
+  navbarClass, navContainerClass, navBrandClass,
+  iconBtn
 } from '../../styles/common'
 
 const Navbar = () => {
@@ -21,10 +22,8 @@ const Navbar = () => {
       <div className={navContainerClass}>
         {/* Logo + Brand */}
         <Link to="/home" className={navBrandClass}>
-          <div className="bg-[var(--surface-2)] border border-[var(--border)] p-1.5 rounded-xl">
-            <img src={logo} alt="VerseLy" className={navLogoClass} />
-          </div>
-          <span className={navBrandText}>VerseLy</span>
+          <img src={logo} alt="VerseLy" className="h-9 w-9 object-contain" />
+          <VerselyWordmark size="md" />
         </Link>
 
         {/* Avatar + Logout */}

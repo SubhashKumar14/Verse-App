@@ -2,7 +2,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { HiHome, HiSearch, HiArchive, HiCog, HiUser, HiLogout } from 'react-icons/hi'
 import { sidebarClass, sidebarLink, sidebarLinkActive, mutedText } from '../../styles/common'
-import logo from '../../assets/logo.png'
+import VerselyWordmark from '../common/VerselyWordmark'
+import logo from '../../assets/versely_logo.png'
 
 const links = [
   { path: '/home', icon: HiHome, label: 'Home' },
@@ -24,11 +25,9 @@ const Sidebar = () => {
   return (
     <aside className={`${sidebarClass} h-full`} aria-label="Main navigation">
       {/* Brand */}
-      <Link to="/home" className="flex items-center gap-2.5 px-3 mb-8">
-        <div className="bg-[var(--surface-2)] border border-[var(--border)] p-1.5 rounded-xl">
-          <img src={logo} alt="VerseLy" className="h-7 w-7 object-contain" />
-        </div>
-        <span className="text-[15px] font-semibold tracking-tight text-[var(--text)]">VerseLy</span>
+      <Link to="/home" className="flex items-center gap-3 px-3 mb-8">
+        <img src={logo} alt="VerseLy" className="h-10 w-10 object-contain" />
+        <VerselyWordmark size="lg" />
       </Link>
 
       {/* Navigation Links */}

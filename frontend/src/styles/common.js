@@ -15,12 +15,12 @@ export const cardClass =
 export const cardHover =
   "bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 hover:border-[var(--border-strong)] transition-all duration-200 cursor-pointer"
 
-// ─── Typography ───────────────────────────────────────
-export const pageTitleClass = "text-[1.75rem] sm:text-[2rem] font-semibold tracking-tight text-[var(--text)] leading-tight mb-1"
+// ─── Typography ───────────────────────────────────────────
+export const pageTitleClass = "text-[1.75rem] sm:text-[2rem] font-bold tracking-[-0.03em] text-[var(--text)] leading-[1.15] mb-1 font-[family-name:var(--font-heading)]"
 export const pageSubtitle = "text-[15px] text-[var(--muted)] leading-relaxed max-w-lg"
-export const headingClass = "text-lg font-semibold text-[var(--text)] tracking-tight"
+export const headingClass = "text-lg font-semibold text-[var(--text)] tracking-[-0.02em] font-[family-name:var(--font-heading)]"
 export const subHeadingClass = "text-sm font-medium text-[var(--muted)]"
-export const sectionLabel = "text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]"
+export const sectionLabel = "text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)] font-[family-name:var(--font-sans)]"
 export const bodyText = "text-[15px] text-[var(--text)] leading-relaxed"
 export const mutedText = "text-sm text-[var(--muted)]"
 export const linkClass =

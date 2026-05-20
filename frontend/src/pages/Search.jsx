@@ -5,7 +5,9 @@ import UserCard from '../components/users/UserCard'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import EmptyState from '../components/common/EmptyState'
 import { HiSearch } from 'react-icons/hi'
-import { pageTitleClass } from '../styles/common'
+import {
+  pageTitleClass, pageSubtitle, sectionLabel, topicPill
+} from '../styles/common'
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -39,28 +41,50 @@ const Search = () => {
     }
   }
 
+  const trendingTopics = ['#buildinpublic', '#devlife', '#writing', '#opensource', '#design', '#indie']
+
   return (
     <div>
       <h1 className={`${pageTitleClass} [text-wrap:balance]`}>Explore</h1>
+      <p className={`${pageSubtitle} mb-8`}>Discover writers and ideas</p>
 
-      <form onSubmit={handleSearch} className="mb-10 mt-6 relative">
-        <HiSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-[color:var(--muted)] text-xl" />
+      {/* Search input — bottom border only, editorial */}
+      <form onSubmit={handleSearch} className="mb-10 relative">
+        <HiSearch className="absolute left-0 top-1/2 -translate-y-1/2 text-[var(--muted)] text-xl" />
         <input
           type="text"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           placeholder="Search people..."
-          className="w-full bg-transparent border-0 border-b border-[color:var(--border)] focus:border-[color:var(--accent)] focus:outline-none focus:ring-0 pl-10 pr-4 py-3 text-lg text-[color:var(--text)] placeholder-[color:var(--muted)] transition-colors duration-200"
+          className="w-full bg-transparent border-0 border-b border-[var(--border)] focus:border-[var(--accent)] focus:outline-none focus:ring-0 pl-8 pr-4 py-3 text-lg text-[var(--text)] placeholder-[var(--muted)] transition-colors duration-200"
         />
       </form>
 
+      {/* Trending topics */}
+      <div className="mb-10">
+        <p className={`${sectionLabel} mb-4`}>Trending</p>
+        <div className="flex flex-wrap gap-2">
+          {trendingTopics.map((topic) => (
+            <button
+              key={topic}
+              onClick={() => {
+                setSearchInput(topic)
+                setSearchParams({ q: topic })
+              }}
+              className={topicPill}
+            >
+              {topic}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Results */}
       {loading ? (
         <LoadingSpinner />
       ) : results.length > 0 ? (
         <div>
-          <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[color:var(--muted)] px-3 mb-3">
-            People
-          </h2>
+          <p className={`${sectionLabel} px-1 mb-3`}>People</p>
           <div className="space-y-0.5">
             {results.map((u) => (
               <UserCard key={u._id} userData={u} />
@@ -70,7 +94,7 @@ const Search = () => {
       ) : searched ? (
         <EmptyState icon="✦" message={`No one found for "${query}"`} />
       ) : (
-        <EmptyState icon="✦" message="Search for people to read." />
+        <EmptyState icon="✦" message="Find writers worth following." />
       )}
     </div>
   )

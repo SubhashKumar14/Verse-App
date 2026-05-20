@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { updateProfile } from '../services/userService'
 import {
-  pageTitleClass, formGroup, labelClass, inputClass,
+  pageTitleClass, pageSubtitle, sectionLabel, formGroup, labelClass, inputClass,
   textareaClass, primaryBtn, dangerBtn, formError, mutedText
 } from '../styles/common'
 import toast from 'react-hot-toast'
 
 const Settings = () => {
   const { user, refreshUser } = useAuth()
+  const { preference, setTheme } = useTheme()
   const [form, setForm] = useState({
     username: user?.username || '',
     bio: user?.bio || '',
@@ -44,11 +46,39 @@ const Settings = () => {
   return (
     <div className="max-w-xl">
       <h1 className={`${pageTitleClass} [text-wrap:balance]`}>Settings</h1>
-      <p className={`${mutedText} mb-8`}>Manage your account preferences and profile details.</p>
+      <p className={`${pageSubtitle} mb-10`}>Manage your account and preferences.</p>
+
+      {/* Appearance Section */}
+      <section className="mb-12">
+        <h2 className={`${sectionLabel} mb-6 border-b border-[var(--border)] pb-2 text-[var(--text)]`}>
+          Appearance
+        </h2>
+        <div className="space-y-3">
+          <label className={labelClass}>Theme</label>
+          <div className="flex gap-2">
+            {['system', 'light', 'dark'].map(opt => (
+              <button
+                key={opt}
+                onClick={() => setTheme(opt)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer capitalize ${
+                  preference === opt
+                    ? 'bg-[var(--accent)] text-[var(--accent-ink)]'
+                    : 'bg-[var(--surface-2)] text-[var(--muted)] hover:text-[var(--text)] border border-[var(--border)]'
+                }`}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+          <p className={`${mutedText} mt-1`}>
+            {preference === 'system' ? 'Following your system preference.' : `Using ${preference} mode.`}
+          </p>
+        </div>
+      </section>
 
       {/* Public Profile Section */}
       <section className="mb-12">
-        <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[color:var(--text)] mb-6 border-b border-[color:var(--border)] pb-2">
+        <h2 className={`${sectionLabel} mb-6 border-b border-[var(--border)] pb-2 text-[var(--text)]`}>
           Public Profile
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -94,13 +124,13 @@ const Settings = () => {
 
       {/* Danger Zone Section */}
       <section className="mb-12">
-        <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[color:var(--danger)] mb-6 border-b border-[color:var(--border)] pb-2">
+        <h2 className={`${sectionLabel} mb-6 border-b border-[var(--border)] pb-2 text-[var(--danger)]`}>
           Danger Zone
         </h2>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-[color:color-mix(in_oklab,var(--danger)_30%,var(--border))] bg-[color:color-mix(in_oklab,var(--danger)_5%,transparent)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl border border-[var(--border)] bg-[var(--danger-soft)]">
           <div>
-            <p className="font-semibold text-[color:var(--text)] text-sm">Delete Account</p>
-            <p className="text-xs text-[color:var(--muted)] mt-1">Permanently remove your account and all data.</p>
+            <p className="font-semibold text-[var(--text)] text-sm">Delete Account</p>
+            <p className="text-xs text-[var(--muted)] mt-1">Permanently remove your account and all data.</p>
           </div>
           <button className={dangerBtn} type="button" onClick={() => toast.error('Not implemented yet')}>
             Delete Account

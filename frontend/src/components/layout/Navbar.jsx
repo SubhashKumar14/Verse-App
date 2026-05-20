@@ -1,27 +1,15 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { HiHome, HiSearch, HiArchive, HiCog, HiLogout } from 'react-icons/hi'
+import { HiLogout } from 'react-icons/hi'
 import logo from '../../assets/logo.png'
 import {
   navbarClass, navContainerClass, navBrandClass, navBrandText,
-  navLogoClass, navSearchClass, navSearchInput, navLinksClass,
-  navLinkClass, navLinkActiveClass, iconBtn
+  navLogoClass, iconBtn
 } from '../../styles/common'
-import { useState } from 'react'
 
 const Navbar = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [searchQuery, setSearchQuery] = useState('')
-  const location = useLocation()
-
-  const handleSearch = (e) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
-      setSearchQuery('')
-    }
-  }
 
   const handleLogout = async () => {
     await logout()
@@ -31,55 +19,19 @@ const Navbar = () => {
   return (
     <nav className={navbarClass}>
       <div className={navContainerClass}>
-        {/* LOGO */}
+        {/* Logo + Brand */}
         <Link to="/home" className={navBrandClass}>
-          <div className="bg-[color:var(--surface-2)] border border-[color:var(--border)] p-1.5 rounded-2xl">
+          <div className="bg-[var(--surface-2)] border border-[var(--border)] p-1.5 rounded-xl">
             <img src={logo} alt="VerseLy" className={navLogoClass} />
           </div>
           <span className={navBrandText}>VerseLy</span>
         </Link>
 
-        {/* Search */}
+        {/* Avatar + Logout */}
         {user && (
-          <form onSubmit={handleSearch} className={navSearchClass}>
-            <HiSearch className="text-[color:var(--muted)] text-lg" />
-            <input
-              type="text"
-              placeholder="Search users..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={navSearchInput}
-            />
-          </form>
-        )}
-
-        {/* Nav Links */}
-        {user && (
-          <div className={navLinksClass}>
-            {/* On desktop the sidebar owns navigation — only show these icons on mobile */}
-            <Link
-              to="/home"
-              className={`md:hidden ${location.pathname === '/home' ? navLinkActiveClass : navLinkClass}`}
-              title="Home"
-            >
-              <HiHome className="text-xl" />
-            </Link>
-            <Link
-              to="/archives"
-              className={`md:hidden ${location.pathname === '/archives' ? navLinkActiveClass : navLinkClass}`}
-              title="Archives"
-            >
-              <HiArchive className="text-xl" />
-            </Link>
-            <Link
-              to="/settings"
-              className={`md:hidden ${location.pathname === '/settings' ? navLinkActiveClass : navLinkClass}`}
-              title="Settings"
-            >
-              <HiCog className="text-xl" />
-            </Link>
-            <Link to={`/profile/${user._id}`} className="ml-1" title="Profile">
-              <div className="w-8 h-8 rounded-full bg-[color:var(--accent)] text-[color:var(--accent-ink)] flex items-center justify-center font-semibold text-xs cursor-pointer hover:brightness-95 transition-all duration-150">
+          <div className="flex items-center gap-1.5">
+            <Link to={`/profile/${user._id}`} title="Profile">
+              <div className="w-8 h-8 rounded-full bg-[var(--accent)] text-[var(--accent-ink)] flex items-center justify-center font-semibold text-xs cursor-pointer hover:opacity-90 transition-all duration-200">
                 {user.username?.charAt(0).toUpperCase()}
               </div>
             </Link>

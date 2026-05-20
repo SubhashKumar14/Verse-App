@@ -16,8 +16,8 @@ const MobileBottomNav = () => {
   if (!user) return null
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-[color:var(--bg)] border-t border-[color:var(--border)] z-50 md:hidden pb-safe">
-      <div className="flex items-center justify-around h-14 px-2">
+    <nav className="fixed bottom-0 left-0 right-0 bg-[var(--surface)] border-t border-[var(--border)] z-50 md:hidden pb-safe" aria-label="Mobile navigation">
+      <div className="flex items-center justify-around h-16 px-2">
         {links.map((item) => {
           const IconComponent = item.icon
           const isActive = location.pathname === item.path
@@ -26,13 +26,13 @@ const MobileBottomNav = () => {
               key={item.path}
               to={item.path}
               aria-label={item.label}
-              className={`relative flex flex-col items-center justify-center w-full h-full transition-colors duration-150 ${
-                isActive ? 'text-[color:var(--accent)]' : 'text-[color:var(--muted)] hover:text-[color:var(--text)]'
+              className={`relative flex flex-col items-center justify-center w-full h-full transition-all duration-200 ${
+                isActive ? 'text-[var(--accent)]' : 'text-[var(--muted)] hover:text-[var(--text)]'
               }`}
             >
-              <IconComponent className="text-[22px]" />
+              <IconComponent className="text-[24px]" />
               {isActive && (
-                <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[color:var(--accent)]"></span>
+                <span className="absolute bottom-2 w-1.5 h-1.5 rounded-full bg-[var(--accent)]"></span>
               )}
             </Link>
           )
@@ -40,13 +40,13 @@ const MobileBottomNav = () => {
         <Link
           to={`/profile/${user._id}`}
           aria-label="Profile"
-          className={`relative flex flex-col items-center justify-center w-full h-full transition-colors duration-150 ${
-            location.pathname.startsWith('/profile') ? 'text-[color:var(--accent)]' : 'text-[color:var(--muted)] hover:text-[color:var(--text)]'
+          className={`relative flex flex-col items-center justify-center w-full h-full transition-all duration-200 ${
+            location.pathname.startsWith('/profile') ? 'text-[var(--accent)]' : 'text-[var(--muted)] hover:text-[var(--text)]'
           }`}
         >
-          <HiUser className="text-[22px]" />
+          <HiUser className="text-[24px]" />
           {location.pathname.startsWith('/profile') && (
-            <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[color:var(--accent)]"></span>
+            <span className="absolute bottom-2 w-1.5 h-1.5 rounded-full bg-[var(--accent)]"></span>
           )}
         </Link>
       </div>

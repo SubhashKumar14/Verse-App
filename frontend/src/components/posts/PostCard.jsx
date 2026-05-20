@@ -57,31 +57,32 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
 
   return (
     <div className={`${postCard} group`}>
-      {/* Author row */}
+      {/* Author row — avatar, username · time inline */}
       <div className={postAuthorRow}>
         <Link to={`/profile/${author._id}`} className={postAvatar} aria-label={`${author.username}'s profile`}>
           {author.username?.charAt(0).toUpperCase()}
         </Link>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex items-center gap-2">
           <Link to={`/profile/${author._id}`} className={postUsername}>
             {author.username}
           </Link>
-          <p className={postTime}>{formatTime(post.createdAt)}</p>
+          <span className="text-[var(--muted)] text-xs select-none">·</span>
+          <span className={postTime}>{formatTime(post.createdAt)}</span>
         </div>
         {isOwner && (
           <button
             onClick={handleDelete}
             disabled={deleting}
             aria-label="Archive post"
-            className="text-[color:var(--muted)] hover:text-[color:var(--danger)] transition-colors duration-150 cursor-pointer p-1 rounded-md -mr-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+            className="text-[var(--muted)] hover:text-[var(--danger)] transition-all duration-200 cursor-pointer p-1.5 rounded-lg -mr-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
           >
-            <HiTrash className="text-base" />
+            <HiTrash className="text-[15px]" />
           </button>
         )}
       </div>
 
       {/* Content */}
-      <div className="mb-3">
+      <div className="mb-4">
         {showLink ? (
           <Link to={`/post/${post._id}`}>
             <p className={postContent}>{post.content}</p>
@@ -89,22 +90,22 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
         ) : (
           <p className={postContent}>{post.content}</p>
         )}
-        
-        {/* Attached Image */}
+
+        {/* Attached Image — borderless, rounded-xl */}
         {post.imageUrl && (
-          <div className="mt-3">
+          <div className="mt-4">
             {showLink ? (
               <Link to={`/post/${post._id}`}>
-                <img src={post.imageUrl} alt="Post attachment" className="rounded-xl border border-[color:var(--border)] w-full object-cover max-h-125" />
+                <img src={post.imageUrl} alt="Post attachment" className="rounded-xl w-full object-cover max-h-[500px]" />
               </Link>
             ) : (
-              <img src={post.imageUrl} alt="Post attachment" className="rounded-xl border border-[color:var(--border)] w-full object-cover max-h-125" />
+              <img src={post.imageUrl} alt="Post attachment" className="rounded-xl w-full object-cover max-h-[500px]" />
             )}
           </div>
         )}
       </div>
 
-      {/* Actions */}
+      {/* Actions — no top border, just spacing */}
       <div className={postActions}>
         <button
           onClick={handleLike}
@@ -112,11 +113,11 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
           aria-label={liked ? 'Unlike post' : 'Like post'}
           className={liked ? postActionBtnActive : postActionBtn}
         >
-          {liked ? <HiHeart className="text-base" /> : <HiOutlineHeart className="text-base" />}
+          {liked ? <HiHeart className="text-[15px]" /> : <HiOutlineHeart className="text-[15px]" />}
           <span>{likesCount}</span>
         </button>
         <Link to={`/post/${post._id}`} className={postActionBtn} aria-label="View comments">
-          <HiChat className="text-base" />
+          <HiChat className="text-[15px]" />
           <span>{post.commentsCount || 0}</span>
         </Link>
       </div>

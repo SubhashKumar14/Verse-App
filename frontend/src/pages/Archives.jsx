@@ -5,7 +5,7 @@ import LoadingSpinner from '../components/common/LoadingSpinner'
 import EmptyState from '../components/common/EmptyState'
 import { HiRefresh } from 'react-icons/hi'
 import {
-  pageTitleClass, tabsContainer, tab, tabActive,
+  pageTitleClass, pageSubtitle, tabsContainer, tab, tabActive,
   archiveCard, restoreBtn, mutedText, postContent
 } from '../styles/common'
 import toast from 'react-hot-toast'
@@ -60,7 +60,9 @@ const Archives = () => {
   return (
     <div>
       <h1 className={`${pageTitleClass} [text-wrap:balance]`}>Archives</h1>
-      <p className={`${mutedText} mb-6`}>Your soft-deleted posts and comments. Restore them anytime.</p>
+      <p className={`${pageSubtitle} mb-8`}>
+        Your digital memory vault. Restore thoughts anytime.
+      </p>
 
       {/* Tabs */}
       <div className={tabsContainer}>
@@ -81,15 +83,15 @@ const Archives = () => {
       {/* Archived Posts */}
       {activeTab === 'posts' && (
         posts.length === 0 ? (
-          <EmptyState icon="✦" message="No archived posts" />
+          <EmptyState icon="✦" message="Your memory vault is empty." />
         ) : (
-          <div className="space-y-0">
+          <div className="space-y-3">
             {posts.map((post) => (
               <div key={post._id} className={archiveCard}>
                 <p className={`${postContent} opacity-80`}>{post.content}</p>
-                <div className="flex items-center justify-between mt-3">
-                  <span className={`${mutedText} tabular-nums uppercase text-[10px] tracking-wider font-semibold`}>
-                    Archived {new Date(post.updatedAt).toLocaleDateString()}
+                <div className="flex items-center justify-between mt-4">
+                  <span className="text-[12px] font-medium text-[var(--muted)] tabular-nums tracking-wide">
+                    Archived {new Date(post.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                   <button onClick={() => handleRestorePost(post._id)} aria-label="Restore post" className={restoreBtn}>
                     <HiRefresh className="text-sm" />
@@ -105,20 +107,20 @@ const Archives = () => {
       {/* Archived Comments */}
       {activeTab === 'comments' && (
         comments.length === 0 ? (
-          <EmptyState icon="✦" message="No archived comments" />
+          <EmptyState icon="✦" message="No archived replies." />
         ) : (
-          <div className="space-y-0">
+          <div className="space-y-3">
             {comments.map((comment) => (
               <div key={comment._id} className={archiveCard}>
-                <p className="text-[15px] text-[color:var(--text)] leading-relaxed opacity-80">{comment.text}</p>
+                <p className="text-[15px] text-[var(--text)] leading-relaxed opacity-80">{comment.text}</p>
                 {comment.post && (
-                  <p className={`${mutedText} mt-1.5 text-[13px] border-l-2 border-[color:var(--border)] pl-2`}>
-                    On: "{comment.post.content?.substring(0, 60)}..."
+                  <p className={`${mutedText} mt-2 text-[13px] italic`}>
+                    Replying to: "{comment.post.content?.substring(0, 60)}…"
                   </p>
                 )}
                 <div className="flex items-center justify-between mt-4">
-                  <span className={`${mutedText} tabular-nums uppercase text-[10px] tracking-wider font-semibold`}>
-                    Archived {new Date(comment.updatedAt).toLocaleDateString()}
+                  <span className="text-[12px] font-medium text-[var(--muted)] tabular-nums tracking-wide">
+                    Archived {new Date(comment.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                   <button onClick={() => handleRestoreComment(comment._id)} aria-label="Restore comment" className={restoreBtn}>
                     <HiRefresh className="text-sm" />

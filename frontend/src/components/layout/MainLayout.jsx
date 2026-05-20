@@ -4,39 +4,33 @@ import Sidebar from './Sidebar'
 import RightSidebar from './RightSidebar'
 import MobileBottomNav from './MobileBottomNav'
 import MobileFAB from './MobileFAB'
-import { pageBackground } from '../../styles/common'
 
 const MainLayout = () => {
   return (
-    <div className={`${pageBackground} h-screen flex flex-col overflow-hidden`}>
-      {/* 1. Fixed Top Navbar */}
-      <div className="shrink-0 z-50">
-        <Navbar />
-      </div>
+    <div className="bg-[var(--bg)] text-[var(--text)] h-screen flex flex-col overflow-hidden">
+      {/* Mobile-only top bar */}
+      <Navbar />
       
-      {/* 2. Scrollable / Computable Content Area beneath Navbar */}
-      <div className="flex-1 overflow-hidden w-full max-w-7xl mx-auto px-0 sm:px-4 py-0 sm:py-6 flex gap-6 lg:gap-8 justify-center">
+      {/* Main 3-column layout */}
+      <div className="flex-1 overflow-hidden w-full max-w-[1400px] mx-auto px-0 md:px-6 lg:px-8 flex justify-center">
         
-        {/* Left Navigation (hidden on mobile) */}
-        <div className="hidden md:block w-64 shrink-0 h-full overflow-y-auto no-scrollbar pb-6">
+        {/* Left Navigation Rail */}
+        <div className="hidden md:block w-52 shrink-0 h-full overflow-y-auto no-scrollbar py-6 pr-2">
           <Sidebar />
         </div>
         
-        {/* Main Feed Activity (Scrolls independently) */}
-        <main className="flex-1 w-full max-w-2xl min-w-0 h-full overflow-y-auto no-scrollbar pb-24 md:pb-6">
+        {/* Center Feed */}
+        <main className="flex-1 w-full max-w-2xl min-w-0 h-full overflow-y-auto no-scrollbar pb-24 md:pb-6 px-4 md:px-6 pt-4 md:pt-6">
           <Outlet />
         </main>
         
-        {/* Right Recommendations (hidden on mobile and tablet) */}
-        <div className="hidden lg:block w-72 shrink-0 h-full overflow-y-auto no-scrollbar pb-6">
+        {/* Right Contextual Sidebar */}
+        <div className="hidden lg:block w-72 shrink-0 h-full overflow-y-auto no-scrollbar py-6 pl-2">
           <RightSidebar />
         </div>
-
       </div>
 
       <MobileFAB />
-      
-      {/* Mobile Bottom Navigation (hidden on desktop) */}
       <MobileBottomNav />
     </div>
   )

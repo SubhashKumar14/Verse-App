@@ -46,12 +46,13 @@ const Register = () => {
   return (
     <div className={`${pageBackground} flex items-center justify-center`}>
       <div className="w-full max-w-md px-4">
-        <div className="text-center mb-8">
-          <img src={logo} alt="VerseLy" className="h-16 mx-auto mb-3" />
-          <h1 className="text-2xl font-semibold tracking-tight text-[color:var(--text)]">
-            <span className="text-[color:var(--accent)]">VerseLy</span>
+        {/* Logo */}
+        <div className="text-center mb-10">
+          <img src={logo} alt="VerseLy" className="h-14 mx-auto mb-4" />
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
+            Start writing
           </h1>
-          <p className={mutedText}>Create your account.</p>
+          <p className={`${mutedText} mt-1`}>Create your account to begin.</p>
         </div>
 
         <div className={formCard}>
@@ -97,7 +98,7 @@ const Register = () => {
               {loading ? 'Creating account...' : 'Sign Up'}
             </button>
           </form>
-          <p className={`${mutedText} text-center mt-5`}>
+          <p className={`${mutedText} text-center mt-6`}>
             Already have an account?{' '}
             <Link to="/login" className={formLink}>Sign In</Link>
           </p>

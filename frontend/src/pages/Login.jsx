@@ -45,12 +45,12 @@ const Login = () => {
     <div className={`${pageBackground} flex items-center justify-center`}>
       <div className="w-full max-w-md px-4">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <img src={logo} alt="VerseLy" className="h-16 mx-auto mb-3" />
-          <h1 className="text-2xl font-semibold tracking-tight text-[color:var(--text)]">
-            <span className="text-[color:var(--accent)]">VerseLy</span>
+        <div className="text-center mb-10">
+          <img src={logo} alt="VerseLy" className="h-14 mx-auto mb-4" />
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
+            Welcome back
           </h1>
-          <p className={mutedText}>Share your verse with the world.</p>
+          <p className={`${mutedText} mt-1`}>Sign in to continue writing.</p>
         </div>
 
         <div className={formCard}>
@@ -84,7 +84,7 @@ const Login = () => {
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-          <p className={`${mutedText} text-center mt-5`}>
+          <p className={`${mutedText} text-center mt-6`}>
             Don't have an account?{' '}
             <Link to="/register" className={formLink}>Sign Up</Link>
           </p>

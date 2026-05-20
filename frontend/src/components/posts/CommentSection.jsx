@@ -69,13 +69,13 @@ const CommentSection = ({ postId }) => {
   if (loading) return <LoadingSpinner size="sm" />
 
   return (
-    <div className="mt-4">
-      <h3 className="text-sm font-semibold text-[color:var(--muted)] mb-3">
+    <div className="mt-6">
+      <h3 className="text-xs font-semibold uppercase tracking-[0.06em] text-[var(--muted)] mb-4">
         Comments ({comments.length})
       </h3>
 
       {/* Comment list */}
-      <div className="space-y-0">
+      <div className="space-y-1">
         {comments.map((c) => {
           const author = c.author || {}
           return (
@@ -86,6 +86,7 @@ const CommentSection = ({ postId }) => {
               <div className={commentBody}>
                 <div className="flex items-center gap-2">
                   <span className={commentUsername}>{author.username}</span>
+                  <span className="text-[var(--muted)] text-[11px] select-none">·</span>
                   <span className={commentTime}>{formatTime(c.createdAt)}</span>
                 </div>
                 <p className={commentText}>{c.text}</p>
@@ -94,7 +95,7 @@ const CommentSection = ({ postId }) => {
                 <button
                   onClick={() => handleDelete(c._id)}
                   aria-label="Delete comment"
-                  className="text-[color:var(--muted)] hover:text-[color:var(--danger)] transition-colors duration-150 cursor-pointer p-1 shrink-0 rounded-md opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                  className="text-[var(--muted)] hover:text-[var(--danger)] transition-all duration-200 cursor-pointer p-1.5 shrink-0 rounded-lg opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
                 >
                   <HiTrash className="text-sm" />
                 </button>
@@ -103,12 +104,12 @@ const CommentSection = ({ postId }) => {
           )
         })}
         {comments.length === 0 && (
-          <p className={`${mutedText} text-sm mt-2`}>No comments yet.</p>
+          <p className={`${mutedText} text-sm py-4`}>No comments yet. Be the first to share your thoughts.</p>
         )}
       </div>
 
-      {/* Add comment */}
-      <form onSubmit={handleSubmit} className="flex gap-2 mt-4">
+      {/* Add comment — warm accent on focus */}
+      <form onSubmit={handleSubmit} className="flex gap-2.5 mt-5">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}

@@ -34,8 +34,8 @@ const UserCard = ({ userData, showFollow = true }) => {
         {userData.username?.charAt(0).toUpperCase()}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-[color:var(--text)] truncate">{userData.username}</p>
-        {userData.bio && <p className={`${mutedText} truncate`}>{userData.bio}</p>}
+        <p className="font-semibold text-[var(--text)] text-[14px] truncate">{userData.username}</p>
+        {userData.bio && <p className={`${mutedText} truncate text-[13px] leading-snug mt-0.5`}>{userData.bio}</p>}
       </div>
       {showFollow && !isSelf && (
         <button

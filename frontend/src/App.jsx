@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth, AuthProvider } from './context/AuthContext'
+import { ThemeProvider } from './context/ThemeContext'
 import { Toaster } from 'react-hot-toast'
 import ProtectedRoute from './components/ProtectedRoute'
 import MainLayout from './components/layout/MainLayout'
@@ -22,46 +23,49 @@ const RootRedirect = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: 'var(--toast-bg)',
-              color: 'var(--toast-fg)',
-              border: '1px solid var(--toast-border)',
-              borderRadius: '14px',
-            },
-          }}
-        />
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<RootRedirect />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                border: '1px solid var(--border)',
+                borderRadius: '12px',
+                fontSize: '14px',
+              },
+            }}
+          />
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<RootRedirect />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* Protected Routes — wrapped in MainLayout */}
-          <Route
-            element={
-              <ProtectedRoute>
-                <MainLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="/home" element={<Home />} />
-            <Route path="/profile/:id" element={<Profile />} />
-            <Route path="/post/:id" element={<PostDetail />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/archives" element={<Archives />} />
-            <Route path="/settings" element={<Settings />} />
-          </Route>
+            {/* Protected Routes — wrapped in MainLayout */}
+            <Route
+              element={
+                <ProtectedRoute>
+                  <MainLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/home" element={<Home />} />
+              <Route path="/profile/:id" element={<Profile />} />
+              <Route path="/post/:id" element={<PostDetail />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/archives" element={<Archives />} />
+              <Route path="/settings" element={<Settings />} />
+            </Route>
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 

@@ -1,65 +1,90 @@
 @import "tailwindcss";
 
+/* ================================================================
+   VerseLy — Coffee Cream Design System
+   "Quiet interface. Loud thoughts."
+   ================================================================ */
+
+/* ─── Light Theme (default) ────────────────────────────────────── */
 :root {
-  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-sans: "Inter", "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* Tinted neutrals + indigo accent (OKLCH). No pure black/white. */
-  --bg: oklch(0.985 0.006 275);
-  --surface: oklch(0.995 0.004 275);
-  --surface-2: oklch(0.972 0.008 275);
-  --text: oklch(0.235 0.02 275);
-  --muted: oklch(0.47 0.015 275);
-  --border: oklch(0.88 0.01 275);
-  --border-strong: oklch(0.82 0.014 275);
+  --bg: #F8F2EA;
+  --surface: #FFF9F4;
+  --surface-2: #F0E8DE;
+  --text: #2B211B;
+  --muted: #7A685B;
+  --border: rgba(0, 0, 0, 0.06);
+  --border-strong: rgba(0, 0, 0, 0.12);
 
-  --accent: oklch(0.62 0.17 275);
-  --accent-ink: oklch(0.98 0.006 275);
-  --accent-soft: color-mix(in oklab, var(--accent) 12%, var(--bg));
-  --accent-border: color-mix(in oklab, var(--accent) 28%, var(--border));
+  --accent: #B56A3A;
+  --accent-active: #D99A6C;
+  --accent-ink: #FFF9F4;
+  --accent-soft: rgba(181, 106, 58, 0.08);
+  --accent-border: rgba(181, 106, 58, 0.18);
 
-  --danger: oklch(0.58 0.19 25);
-  --success: oklch(0.62 0.16 145);
-  --warning: oklch(0.7 0.14 85);
-  --info: oklch(0.66 0.13 215);
-  --warning-soft: color-mix(in oklab, var(--warning) 14%, var(--bg));
-  --info-soft: color-mix(in oklab, var(--info) 14%, var(--bg));
-  --success-soft: color-mix(in oklab, var(--success) 14%, var(--bg));
-  --danger-soft: color-mix(in oklab, var(--danger) 12%, var(--bg));
+  --danger: #B5463A;
+  --danger-soft: rgba(181, 70, 58, 0.07);
+  --success: #5C8A5E;
+  --success-soft: rgba(92, 138, 94, 0.08);
+  --warning: #B8893A;
+  --warning-soft: rgba(184, 137, 58, 0.08);
+  --info: #5C7A8A;
+  --info-soft: rgba(92, 122, 138, 0.08);
 
-  --ring: color-mix(in oklab, var(--accent) 55%, transparent);
+  --ring: rgba(181, 106, 58, 0.4);
 
   --toast-bg: var(--surface);
   --toast-fg: var(--text);
   --toast-border: var(--border);
+
+  /* Spacing tokens */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* Radius tokens */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-full: 9999px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: oklch(0.16 0.01 275);
-    --surface: oklch(0.19 0.012 275);
-    --surface-2: oklch(0.24 0.014 275);
-    --text: oklch(0.93 0.01 275);
-    --muted: oklch(0.72 0.01 275);
-    --border: oklch(0.28 0.01 275);
-    --border-strong: oklch(0.34 0.012 275);
+/* ─── Dark Theme ───────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg: #11100F;
+  --surface: #1B1613;
+  --surface-2: #241E19;
+  --text: #F5EFE8;
+  --muted: #B7A99A;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
 
-    --accent: oklch(0.72 0.16 275);
-    --accent-ink: oklch(0.16 0.01 275);
-    --accent-soft: color-mix(in oklab, var(--accent) 18%, var(--bg));
-    --accent-border: color-mix(in oklab, var(--accent) 32%, var(--border));
+  --accent: #C98B5A;
+  --accent-active: #E6B98F;
+  --accent-ink: #11100F;
+  --accent-soft: rgba(201, 139, 90, 0.1);
+  --accent-border: rgba(201, 139, 90, 0.2);
 
-    --warning: oklch(0.78 0.12 85);
-    --info: oklch(0.74 0.11 215);
-    --warning-soft: color-mix(in oklab, var(--warning) 16%, var(--bg));
-    --info-soft: color-mix(in oklab, var(--info) 16%, var(--bg));
-    --success-soft: color-mix(in oklab, var(--success) 16%, var(--bg));
-    --danger-soft: color-mix(in oklab, var(--danger) 14%, var(--bg));
+  --danger: #C45B4A;
+  --danger-soft: rgba(196, 91, 74, 0.1);
+  --success: #6B9B6E;
+  --success-soft: rgba(107, 155, 110, 0.1);
+  --warning: #C4933A;
+  --warning-soft: rgba(196, 147, 58, 0.1);
+  --info: #6B8FAE;
+  --info-soft: rgba(107, 143, 174, 0.1);
 
-    --ring: color-mix(in oklab, var(--accent) 45%, transparent);
-  }
+  --ring: rgba(201, 139, 90, 0.35);
 }
 
+/* ─── Base Styles ──────────────────────────────────────────────── */
 html {
   color-scheme: light dark;
 }
@@ -74,10 +99,14 @@ body {
   font-kerning: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  letter-spacing: -0.011em;
 }
 
+/* ─── Typography ───────────────────────────────────────────────── */
 h1, h2, h3, h4, h5, h6 {
   text-wrap: balance;
+  letter-spacing: -0.02em;
 }
 
 p {
@@ -85,9 +114,10 @@ p {
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--accent) 22%, transparent);
+  background: var(--accent-soft);
 }
 
+/* ─── Interactive Resets ───────────────────────────────────────── */
 :where(a, button, input, textarea, select) {
   -webkit-tap-highlight-color: transparent;
 }
@@ -97,53 +127,52 @@ p {
   outline-offset: 2px;
 }
 
-/* Custom scrollbar (tinted, theme-aware) */
+/* ─── Scrollbar (warm-tinted, theme-aware) ─────────────────────── */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: color-mix(in oklab, var(--bg) 92%, var(--surface-2));
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in oklab, var(--text) 18%, var(--bg));
-  border-radius: 999px;
+  background: var(--border-strong);
+  border-radius: var(--radius-full);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in oklab, var(--text) 26%, var(--bg));
+  background: var(--muted);
 }
 
-/* Safe Area Paddings for iOS/Mobile Navbars */
+/* ─── Safe Area Paddings ───────────────────────────────────────── */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
-/* Utility to hide scrollbar but keep functionality */
+/* ─── Utilities ────────────────────────────────────────────────── */
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
 
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
-  /* Tabular numbers for counts, timestamps, character counters */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
 
-  /* Safe padding for iOS home indicator */
   .pt-safe {
     padding-top: env(safe-area-inset-top);
   }
 }
 
+/* ─── Reduced Motion ───────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     scroll-behavior: auto !important;
@@ -151,4 +180,12 @@ p {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+/* ─── Smooth Transitions for Theme Switching ───────────────────── */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
 }

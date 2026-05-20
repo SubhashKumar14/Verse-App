@@ -1,76 +1,78 @@
-# Design System
+# Design System — Coffee Cream
 
 ## Theme
 
-Adaptive: genuine light and dark, both first-class. Dark is the primary emotional register — code-adjacent neutrals, low-chroma tinted surfaces, high contrast for text. Light is calm and spare, not clinical white.
+Adaptive: genuine light and dark, both first-class. Dark is the primary emotional register: deep espresso tones, warm neutral surfaces, cream text. Light is calm and spare, not clinical white but warm parchment.
 
-Color scheme follows `prefers-color-scheme`. No manual toggle yet.
+Theme follows `prefers-color-scheme` by default with manual override via Settings. Toggle stored in `localStorage`. Applied via `data-theme` attribute on `<html>`.
 
-**Scene (dark):** a developer composing a thought at their desk at 10pm, single monitor, quiet room. The UI recedes; the text breathes.
+**Scene (dark):** a developer composing a thought at their desk at 10pm, single monitor, quiet room. The warm interface feels like writing by candlelight. Not clinical, not harsh.
 
-**Scene (light):** the same person at a coffee shop mid-morning, natural light, writing a reflection before the day accelerates.
+**Scene (light):** the same person at a coffee shop mid-morning, natural light, warm wood tones around them. The parchment-cream interface blends with the environment.
 
 ---
 
 ## Color
 
-**Strategy:** Restrained — tinted neutrals with a single indigo-violet accent (hue 275). Accent covers ≤10% of any surface. No pure `#000` or `#fff`. OKLCH throughout.
+**Strategy:** Restrained: warm tinted neutrals with a single caramel/coffee accent. No pure `#000` or `#fff`. Hex values throughout for reliability.
+
+### Dark theme (primary)
+
+| Token | Value | Role |
+|---|---|---|
+| `--bg` | `#11100F` | Page background (near-black warm) |
+| `--surface` | `#1B1613` | Card / panel surface (espresso) |
+| `--surface-2` | `#241E19` | Raised inputs, hover tint |
+| `--text` | `#F5EFE8` | Primary text (warm cream) |
+| `--muted` | `#B7A99A` | Secondary / metadata text |
+| `--border` | `rgba(255,255,255,0.06)` | Default border |
+| `--border-strong` | `rgba(255,255,255,0.12)` | Hover / focus border |
+| `--accent` | `#C98B5A` | Primary accent (caramel) |
+| `--accent-active` | `#E6B98F` | Active / hover accent (light caramel) |
+| `--accent-ink` | `#11100F` | Text on accent background |
+| `--accent-soft` | `rgba(201,139,90,0.1)` | Tinted accent surface |
+| `--accent-border` | `rgba(201,139,90,0.2)` | Accent-tinted border |
+| `--danger` | `#C45B4A` | Destructive / error (warm terracotta) |
+| `--success` | `#6B9B6E` | Success (sage green) |
+| `--warning` | `#C4933A` | Warning (amber) |
+| `--info` | `#6B8FAE` | Informational (warm blue-grey) |
 
 ### Light theme
 
 | Token | Value | Role |
 |---|---|---|
-| `--bg` | `oklch(0.985 0.006 275)` | Page background |
-| `--surface` | `oklch(0.995 0.004 275)` | Card / panel surface |
-| `--surface-2` | `oklch(0.972 0.008 275)` | Raised inputs, hover tint |
-| `--text` | `oklch(0.235 0.02 275)` | Primary text |
-| `--muted` | `oklch(0.47 0.015 275)` | Secondary / metadata text |
-| `--border` | `oklch(0.88 0.01 275)` | Default border |
-| `--border-strong` | `oklch(0.82 0.014 275)` | Hover / focus border |
-| `--accent` | `oklch(0.62 0.17 275)` | Primary accent (indigo-violet) |
-| `--accent-ink` | `oklch(0.98 0.006 275)` | Text on accent background |
-| `--accent-soft` | `color-mix(in oklab, accent 12%, bg)` | Tinted accent surface |
-| `--accent-border` | `color-mix(in oklab, accent 28%, border)` | Accent-tinted border |
-| `--danger` | `oklch(0.58 0.19 25)` | Destructive / error |
-| `--success` | `oklch(0.62 0.16 145)` | Success |
-| `--warning` | `oklch(0.7 0.14 85)` | Warning |
-| `--info` | `oklch(0.66 0.13 215)` | Informational |
+| `--bg` | `#F8F2EA` | Page background (warm parchment) |
+| `--surface` | `#FFF9F4` | Card / panel surface (warm white) |
+| `--surface-2` | `#F0E8DE` | Raised inputs, hover tint |
+| `--text` | `#2B211B` | Primary text (espresso dark) |
+| `--muted` | `#7A685B` | Secondary / metadata text |
+| `--border` | `rgba(0,0,0,0.06)` | Default border |
+| `--border-strong` | `rgba(0,0,0,0.12)` | Hover / focus border |
+| `--accent` | `#B56A3A` | Primary accent (darker caramel) |
+| `--accent-active` | `#D99A6C` | Active / hover accent |
+| `--accent-ink` | `#FFF9F4` | Text on accent background |
 
-### Dark theme overrides (`prefers-color-scheme: dark`)
-
-| Token | Value |
-|---|---|
-| `--bg` | `oklch(0.16 0.01 275)` |
-| `--surface` | `oklch(0.19 0.012 275)` |
-| `--surface-2` | `oklch(0.24 0.014 275)` |
-| `--text` | `oklch(0.93 0.01 275)` |
-| `--muted` | `oklch(0.72 0.01 275)` |
-| `--border` | `oklch(0.28 0.01 275)` |
-| `--border-strong` | `oklch(0.34 0.012 275)` |
-| `--accent` | `oklch(0.72 0.16 275)` |
-| `--accent-ink` | `oklch(0.16 0.01 275)` |
-
-Semantic soft variants (`--danger-soft`, `--success-soft`, `--warning-soft`, `--info-soft`) are computed via `color-mix(in oklab, token 12–16%, bg)` in both themes.
+Semantic soft variants (`--danger-soft`, `--success-soft`, etc.) computed as low-opacity tints of the semantic color.
 
 ---
 
 ## Typography
 
 ```
---font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, …
---font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, …
+--font-sans: "Inter", "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif
+--font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace
 ```
 
 | Role | Size | Weight | Notes |
 |---|---|---|---|
-| Page title | 1.7–1.875rem | 600 | `tracking-tight` |
-| Heading | 1.125rem | 600 | — |
-| Body | 1rem / 0.9375rem | 400 | `leading-relaxed` |
-| Subheading / label | 0.875rem | 500–600 | Uppercase, wide tracking |
+| Page title | 1.75-2rem | 600 | `tracking-tight`, `leading-tight` |
+| Heading | 1.125rem | 600 | `tracking-tight` |
+| Body / Post content | 1rem (16px) | 400 | `leading-[1.7]`, comfortable reading |
+| Subheading / label | 0.6875rem (11px) | 600 | Uppercase, `tracking-[0.08em]` |
 | Muted / meta | 0.875rem | 400 | `--muted` color |
-| Small / timestamp | 0.75rem | 400 | — |
+| Small / timestamp | 0.75rem | 400 | Tabular nums |
 
-Body max line length: 65ch (enforced by `max-w-2xl` column). Scale ratio: ≥1.25 between adjacent levels.
+Body max line length: 65ch (enforced by `max-w-2xl` column). Scale ratio: ≥1.25 between adjacent levels. Letter-spacing on body: `-0.011em` for tighter, more editorial feel.
 
 ---
 
@@ -78,32 +80,35 @@ Body max line length: 65ch (enforced by `max-w-2xl` column). Scale ratio: ≥1.2
 
 **Page widths:**
 - Narrow column (feed, forms): `max-w-2xl` (672px)
-- Wide shell (main layout): `max-w-6xl`
-- Horizontal padding: `px-4 sm:px-6`
-- Vertical padding: `py-8` – `py-10`
+- Wide shell (main layout): `max-w-[1400px]`
+- Horizontal padding: `px-4 md:px-6 lg:px-8`
 
-**Feed rhythm:** non-uniform vertical spacing is intentional — `space-y-4` between posts, `mb-6` after composer, `mb-10` at section breaks. Variation creates reading rhythm; uniform spacing creates monotony.
+**Layout structure:** Three-column on desktop:
+- Left rail: `w-52` navigation with logo, links, logout
+- Center feed: fluid `max-w-2xl`
+- Right sidebar: `w-72` contextual content
 
-**Layout structure:** single-column feed center, optional `w-56` sidebar hidden below `md`. No nested cards. No container wrapping everything.
+Mobile: single column with bottom tab navigation, mobile-only slim top bar.
+
+**Feed rhythm:** Posts separated by bottom border (`border-b`), no card boxing. Generous `py-5` per post. Composer gets `mb-8` below it. Non-uniform spacing creates reading rhythm.
 
 ---
 
 ## Elevation & Surfaces
 
-Surfaces are separated by border color and chroma difference — not drop shadows.
+Surfaces are separated by color difference and subtle borders, not drop shadows.
 
 | Level | Treatment |
 |---|---|
 | Base page | `--bg`, no border |
-| Cards / panels | `--surface` + `border-[--border]` + `shadow-[0_1px_0_0_rgba(0,0,0,0.04)]` |
-| Raised / active | `--surface-2`, no border by default |
-| Overlay / scrim | `backdrop-blur-sm` + `--bg` 55% via `color-mix` |
+| Cards / panels | `--surface` + `border-[--border]` |
+| Raised / active | `--surface-2` |
+| Overlay / scrim | `backdrop-blur-sm` + `--bg` 60% opacity |
 
 **Border radius scale:**
-- `rounded-xl` — inputs, small interactive elements
-- `rounded-2xl` — cards, panels, modals
-- `rounded-3xl` — feature / hero panels
-- `rounded-full` — buttons, avatars, pill badges
+- `rounded-lg` (8px) — buttons, inputs, cards, panels
+- `rounded-xl` (12px) — larger cards, image containers
+- `rounded-full` — avatars, badge pills
 
 ---
 
@@ -113,42 +118,45 @@ Surfaces are separated by border color and chroma difference — not drop shadow
 
 | Variant | Style |
 |---|---|
-| Primary | Filled `--accent` bg, `--accent-ink` text, `rounded-full`, `hover:brightness-95` |
-| Secondary | `--surface` bg, border, `rounded-full`, hover darkens border and bg |
-| Ghost | No bg, muted text, `rounded-full`, hover adds `--surface-2` fill |
-| Icon | `p-2 rounded-full`, muted → text on hover |
+| Primary | Filled `--accent` bg, `--accent-ink` text, `rounded-lg`, `hover:opacity-90` |
+| Secondary | `--surface` bg, border, `rounded-lg`, hover darkens border and bg |
+| Ghost | No bg, muted text, `rounded-lg`, hover adds `--surface-2` fill |
+| Icon | `p-2 rounded-lg`, muted → text on hover |
 | Danger | `--danger-soft` bg, `--danger` text, danger-tinted border |
 
-All buttons: `disabled:opacity-50 disabled:cursor-not-allowed`, `focus-visible:ring-2 ring-[--ring]`.
+All buttons: `disabled:opacity-40 disabled:cursor-not-allowed`, `focus-visible:ring-2 ring-[--ring]`.
 
 ### Post Card
 
-No outer shadow — border + surface separation only. Structure:
-- **Author row:** 36px circular avatar (letter initial, `--surface-2` bg), username (`font-medium`), timestamp (`--muted`, `text-xs`). Gap: `2.5`.
-- **Content:** `text-[15px] leading-relaxed whitespace-pre-wrap`. No clamp; posts are short by design.
-- **Action row:** separated from content by `border-t border-[--border]`. Actions: icon + count, `--muted` at rest, `--text` on hover. Like active: `--danger`.
+Borderless divider model: items separated by bottom border, not boxed cards.
+- **Author row:** 40px circular avatar, username + timestamp with · separator. Gap: 3.
+- **Content:** `text-[16px] leading-[1.7] whitespace-pre-wrap`. Comfortable reading size.
+- **Action row:** No top border, just spacing. Actions: icon + count, muted at rest, accent on hover. Like active: `--danger`.
+
+### Composer
+
+- Softer `--surface` background with border
+- 3-row textarea, transparent bg, no border at rest
+- Placeholder: "What's on your mind..."
+- Action row: photo button + char count left, Post button right
 
 ### Forms / Inputs
 
-- Input: `rounded-xl`, `--surface` bg, `border-[--border]`, `focus-visible:ring-2 ring-[--ring]`, `focus:border-[--border-strong]`
+- Input: `rounded-lg`, `--surface-2` bg, `border-[--border]`, warm focus ring
 - Textarea: same as input, `resize-none`
-- Label: `text-xs font-semibold uppercase tracking-wide --muted`, `mb-1.5`
-- Submit: full-width `rounded-full` primary button, `mt-2`
-- Error message: `--danger` text, `text-xs`, `mt-1.5`
+- Label: `text-[11px] font-semibold uppercase tracking-[0.06em]`, muted color
 
 ### Navigation
 
-**Top navbar:** sticky, `backdrop-blur`, `h-16`, `border-b`. Logo + brand name left, nav icon links right. `max-w-6xl` container.
+**Left sidebar (desktop):** Logo at top, navigation links, logout at bottom. Active: accent text + accent-soft bg, font-semibold.
 
-**Nav links:** `p-2 rounded-full`, muted at rest, accent + `--accent-soft` bg on active.
+**Mobile top bar:** Slim `h-14`, logo + avatar. Hidden on desktop.
 
-**Sidebar:** `w-56`, hidden below `md`. Link items: `px-3 py-2.5 rounded-xl`, muted → accent on hover with `--accent-soft` bg. Active: accent text + `--accent-soft` bg, `font-semibold`.
-
-**Mobile:** bottom tab bar with `pb-safe` for iOS home indicator clearance.
+**Mobile bottom nav:** Tab bar with warm accent active state and dot indicator.
 
 ### Tabs
 
-Underline indicator only — no filled pill tabs. `border-b border-[--border]` container, `gap-6` between items.
+Underline indicator only. `border-b border-[--border]` container, `gap-8` between items.
 - **Active:** `border-b-2 border-[--accent]`, accent text, `font-semibold`
 - **Inactive:** muted text, `border-b-2 border-transparent`, hover to `--text`
 
@@ -158,61 +166,49 @@ Circular. Letter-initial fallback: centered initial, `--muted` text, `--surface-
 
 | Context | Size |
 |---|---|
-| Comment | `w-7 h-7` (28px) |
-| Post | `w-9 h-9` (36px) |
-| User card / suggestion | `w-10 h-10` (40px) |
-| Profile header | `w-16 h-16` (64px) |
-
-### Follow Button
-
-`rounded-full px-4 py-1.5 text-xs font-semibold`.
-- **Follow:** `--accent` bg, `--accent-ink` text
-- **Following:** `--surface` bg, `--border`, hover shifts text to `--danger` (destructive affordance on hover only)
+| Comment | `w-8 h-8` (32px) |
+| Post / User card | `w-10 h-10` (40px) |
+| Profile header | `w-24 h-24` (96px) |
 
 ### Archives Card
 
-`--warning-soft` bg, dashed border tinted to warning. Restore action: `--info-soft` pill, info-tinted border.
+`--surface` bg, `rounded-xl`, standard border. Restore action: info-tinted pill with `--info-soft` bg.
 
-### Toaster
+### Topic Pill
 
-Theme-aware via CSS vars: `--toast-bg`, `--toast-fg`, `--toast-border`. Border radius: `14px`.
+`text-[12px]`, `px-3 py-1.5`, `rounded-lg`, `--surface-2` bg, `--muted` text, border, hover to `--text`.
 
-### Modals / Overlays
+### Badges
 
-Overlay: `fixed inset-0 backdrop-blur-sm` + 55% `--bg` scrim, `z-40`.
-Modal: `fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2`, `--surface`, `border`, `rounded-2xl`, `shadow-xl`, `z-50`, `max-w-sm`.
-
-### Badges / Pills
-
-`text-[11px] font-medium px-2 py-0.5 rounded-full --accent-soft bg --accent text --accent-border border`.
+`text-[11px] font-semibold px-2.5 py-1 rounded-md`, accent-soft bg, accent text, accent-border.
 
 ### Empty States
 
-Centered, `py-12`. Icon: `text-3xl --accent`. Message: `text-sm font-medium --muted`.
+Centered, `py-20`. Icon: `text-3xl --accent opacity-50`. Message: `text-[15px] font-medium --muted`.
 
 ---
 
 ## Motion
 
 - **Default transition:** `duration-200`, `ease-out`
-- **Fast (hover on nav/sidebar):** `duration-150`
-- **Properties animated:** `color`, `background-color`, `border-color`, `opacity`, `box-shadow` — never layout properties (`width`, `height`, `padding`, `margin`)
+- **Properties animated:** `color`, `background-color`, `border-color`, `opacity`, `transform`
 - **No bounce, no elastic.** Ease-out only.
-- **`prefers-reduced-motion`:** all `transition-duration` and `animation-duration` collapse to `0.001ms`. Iteration count: 1. Scroll behavior: `auto`.
+- **Theme switch:** 300ms transition on bg, color, border via `.theme-transitioning` class
+- **`prefers-reduced-motion`:** all durations collapse to `0.001ms`.
 
 ---
 
 ## Iconography
 
-Library: `react-icons` v5. Icons are decorative support — always paired with a visible label or an explicit `aria-label` on icon-only controls. Icon alone is never the sole signal for meaning.
+Library: `react-icons` v5 (HeroIcons set). Icons are decorative support, always paired with a visible label or `aria-label`.
 
 ---
 
 ## Accessibility Patterns
 
-- Focus ring: `focus-visible:ring-2 ring-[--ring]` (accent at 45–55% opacity) — visible but not aggressive
+- Focus ring: `focus-visible:ring-2 ring-[--ring]` (accent at 35-40% opacity)
 - Ring offset: `outline-offset: 2px`
 - `-webkit-tap-highlight-color: transparent` on interactive elements
-- Color is never the only state signal: active nav uses both color and bg tint; error uses both color and label
-- Touch targets: minimum 44px on mobile for all interactive elements (enforced via `p-2` icon buttons and `py-2.5` nav links)
-- Scrollbar: custom, tinted, theme-aware — 8px, `border-radius: 999px`
+- Color is never the only state signal
+- Touch targets: minimum 44px on mobile
+- Scrollbar: custom, 6px, warm-tinted, `border-radius: 999px`

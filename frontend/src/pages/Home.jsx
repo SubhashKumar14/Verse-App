@@ -4,7 +4,7 @@ import CreatePost from '../components/posts/CreatePost'
 import PostCard from '../components/posts/PostCard'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import EmptyState from '../components/common/EmptyState'
-import { pageTitleClass } from '../styles/common'
+import { ghostBtn } from '../styles/common'
 
 const Home = () => {
   const [posts, setPosts] = useState([])
@@ -43,10 +43,10 @@ const Home = () => {
 
   return (
     <div>
-      <h1 className={`${pageTitleClass} [text-wrap:balance]`}>Home</h1>
-
-      {/* Composer */}
-      <CreatePost onPostCreated={handlePostCreated} />
+      {/* Composer with editorial breathing room */}
+      <div className="mb-8">
+        <CreatePost onPostCreated={handlePostCreated} />
+      </div>
 
       {/* Feed */}
       {loading ? (
@@ -59,11 +59,11 @@ const Home = () => {
             <PostCard key={post._id} post={post} onDelete={handlePostDeleted} />
           ))}
           {hasMore && (
-            <div className="text-center py-6">
+            <div className="text-center py-10">
               <button
                 onClick={loadMore}
                 disabled={loadingMore}
-                className="text-sm text-[color:var(--muted)] hover:text-[color:var(--text)] transition-colors duration-150 disabled:opacity-50"
+                className={`${ghostBtn} px-8 py-3`}
               >
                 {loadingMore ? 'Loading…' : 'Load more'}
               </button>

@@ -56,37 +56,37 @@ const CreatePost = ({ onPostCreated }) => {
 
   return (
     <div className={composerCard}>
-      <div className="flex gap-3">
-        <div className={`${postAvatar} mt-0.5`}>
+      <div className="flex gap-3.5">
+        <div className={`${postAvatar} mt-1`}>
           {user?.username?.charAt(0).toUpperCase()}
         </div>
         <form onSubmit={handleSubmit} className="flex-1 min-w-0">
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Write something."
-            rows={2}
-            className={`${textareaClass} border-0 bg-transparent px-0 py-1 focus-visible:ring-0 resize-none text-[15px] placeholder:text-[color:var(--muted)] placeholder:font-normal`}
+            placeholder="What's on your mind..."
+            rows={3}
+            className={`${textareaClass} border-0 bg-transparent px-0 py-1.5 focus-visible:ring-0 resize-none text-[16px] leading-[1.7] placeholder:text-[var(--muted)] placeholder:font-normal`}
             maxLength={500}
           />
 
-          {/* Image Preview */}
+          {/* Image Preview — borderless, rounded-xl */}
           {preview && (
-            <div className="relative mt-2 w-fit">
-              <img src={preview} alt="Upload preview" className="max-h-56 object-cover rounded-xl border border-[color:var(--border)]" />
+            <div className="relative mt-3 w-fit">
+              <img src={preview} alt="Upload preview" className="max-h-60 object-cover rounded-xl" />
               <button
                 type="button"
                 onClick={removeImage}
                 aria-label="Remove attached image"
-                className="absolute top-2 right-2 p-1.5 bg-[color:var(--text)] hover:bg-[color:var(--danger)] text-[color:var(--accent-ink)] rounded-full transition-colors duration-150"
+                className="absolute top-2 right-2 p-1.5 bg-[var(--text)] hover:bg-[var(--danger)] text-[var(--accent-ink)] rounded-full transition-all duration-200"
               >
                 <HiX className="text-sm" />
               </button>
             </div>
           )}
 
-          <div className="flex justify-between items-center mt-2 pt-2 border-t border-[color:var(--border)]">
-            <div className="flex items-center gap-2">
+          <div className="flex justify-between items-center mt-3 pt-3 border-t border-[var(--border)]">
+            <div className="flex items-center gap-3">
               <input
                 type="file"
                 ref={fileInputRef}
@@ -98,12 +98,12 @@ const CreatePost = ({ onPostCreated }) => {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 aria-label="Attach a photo"
-                className={`${iconBtn} text-[color:var(--muted)] hover:text-[color:var(--accent)]`}
+                className={`${iconBtn} text-[var(--muted)] hover:text-[var(--accent)]`}
               >
-                <HiPhotograph className="text-lg" />
+                <HiPhotograph className="text-xl" />
               </button>
               {content.length > 0 && (
-                <span className="text-xs text-[color:var(--muted)] tabular-nums">
+                <span className="text-xs text-[var(--muted)] tabular-nums font-medium">
                   {500 - content.length}
                 </span>
               )}

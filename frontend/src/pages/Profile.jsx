@@ -9,7 +9,7 @@ import EmptyState from '../components/common/EmptyState'
 import {
   profileHeader, profileAvatar, profileName, profileBio,
   profileStat, profileStatNumber, profileStatLabel,
-  followBtn, followBtnFollow, followBtnUnfollow, pageTitleClass
+  followBtn, followBtnFollow, followBtnUnfollow, sectionLabel
 } from '../styles/common'
 import toast from 'react-hot-toast'
 
@@ -69,7 +69,7 @@ const Profile = () => {
     <div>
       {/* Profile Header */}
       <div className={profileHeader}>
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
           <div className={profileAvatar} aria-hidden="true">
             {profile.username?.charAt(0).toUpperCase()}
           </div>
@@ -87,7 +87,7 @@ const Profile = () => {
               )}
             </div>
             {profile.bio && <p className={profileBio}>{profile.bio}</p>}
-            <div className="flex gap-6 mt-5 justify-center sm:justify-start">
+            <div className="flex gap-8 mt-6 justify-center sm:justify-start">
               <div className={profileStat}>
                 <span className={profileStatNumber}>{profile.postsCount || 0}</span>
                 <span className={profileStatLabel}>Posts</span>
@@ -106,9 +106,9 @@ const Profile = () => {
       </div>
 
       {/* User's Posts */}
-      <h2 className="text-[11px] font-semibold uppercase tracking-widest text-[color:var(--muted)] px-1 mb-2 mt-6">Posts</h2>
+      <p className={`${sectionLabel} px-1 mb-3 mt-8`}>Posts</p>
       {posts.length === 0 ? (
-        <EmptyState icon="✦" message="No posts yet" />
+        <EmptyState icon="✦" message={isSelf ? "You haven't written anything yet." : "No posts yet."} />
       ) : (
         <div className="space-y-0">
           {posts.map((post) => (

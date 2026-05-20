@@ -1,7 +1,8 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { HiHome, HiUser, HiArchive, HiCog, HiSearch } from 'react-icons/hi'
-import { sidebarClass, sidebarLink, sidebarLinkActive } from '../../styles/common'
+import { HiHome, HiSearch, HiArchive, HiCog, HiUser, HiLogout } from 'react-icons/hi'
+import { sidebarClass, sidebarLink, sidebarLinkActive, mutedText } from '../../styles/common'
+import logo from '../../assets/logo.png'
 
 const links = [
   { path: '/home', icon: HiHome, label: 'Home' },
@@ -12,10 +13,25 @@ const links = [
 
 const Sidebar = () => {
   const location = useLocation()
-  const { user } = useAuth()
+  const navigate = useNavigate()
+  const { user, logout } = useAuth()
+
+  const handleLogout = async () => {
+    await logout()
+    navigate('/login')
+  }
 
   return (
-    <aside className={sidebarClass} aria-label="Main navigation">
+    <aside className={`${sidebarClass} h-full`} aria-label="Main navigation">
+      {/* Brand */}
+      <Link to="/home" className="flex items-center gap-2.5 px-3 mb-8">
+        <div className="bg-[var(--surface-2)] border border-[var(--border)] p-1.5 rounded-xl">
+          <img src={logo} alt="VerseLy" className="h-7 w-7 object-contain" />
+        </div>
+        <span className="text-[15px] font-semibold tracking-tight text-[var(--text)]">VerseLy</span>
+      </Link>
+
+      {/* Navigation Links */}
       <div className="space-y-1">
         {links.map((item) => {
           const IconComponent = item.icon
@@ -38,6 +54,26 @@ const Sidebar = () => {
             <HiUser className="text-xl" />
             <span>Profile</span>
           </Link>
+        )}
+      </div>
+
+      {/* Spacer */}
+      <div className="flex-1" />
+
+      {/* Logout */}
+      <div className="pt-4 border-t border-[var(--border)] mt-4">
+        <button
+          onClick={handleLogout}
+          className={`${sidebarLink} w-full text-left`}
+          aria-label="Log out"
+        >
+          <HiLogout className="text-xl" />
+          <span>Log out</span>
+        </button>
+        {user && (
+          <p className={`${mutedText} text-xs px-3 mt-3 truncate`}>
+            @{user.username}
+          </p>
         )}
       </div>
     </aside>

@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getUser, toggleFollow } from '../services/userService'
 import { getUserPosts } from '../services/postService'
 import PostCard from '../components/posts/PostCard'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import EmptyState from '../components/common/EmptyState'
+import Avatar from '../components/common/Avatar'
 import {
-  profileHeader, profileAvatar, profileName, profileBio,
+  profileHeader, profileName, profileBio,
   profileStat, profileStatNumber, profileStatLabel,
-  followBtn, followBtnFollow, followBtnUnfollow, sectionLabel
+  followBtn, followBtnFollow, followBtnUnfollow, sectionLabel, secondaryBtn
 } from '../styles/common'
 import toast from 'react-hot-toast'
 
@@ -70,13 +71,19 @@ const Profile = () => {
       {/* Profile Header */}
       <div className={profileHeader}>
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
-          <div className={profileAvatar} aria-hidden="true">
-            {profile.username?.charAt(0).toUpperCase()}
-          </div>
+          <Avatar
+            src={profile.profilePicture}
+            name={profile.username}
+            sizeClassName="w-24 h-24"
+          />
           <div className="flex-1 text-center sm:text-left min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h1 className={`${profileName} mt-0 [text-wrap:balance]`}>{profile.username}</h1>
-              {!isSelf && (
+              <h1 className={`${profileName} mt-0 text-balance`}>{profile.username}</h1>
+              {isSelf ? (
+                <Link to="/settings" className={secondaryBtn}>
+                  Edit profile
+                </Link>
+              ) : (
                 <button
                   onClick={handleFollow}
                   aria-pressed={isFollowing}

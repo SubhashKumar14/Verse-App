@@ -1,6 +1,8 @@
 import express from 'express'
 import { protect } from '../middleware/authMiddleware.js'
+import upload from '../middleware/uploadMiddleware.js'
 import { User } from '../models/User.js'
+import { deleteCloudinaryImage, uploadImage } from '../services/mediaService.js'
 
 export const userApp = express.Router()
 
@@ -38,19 +40,55 @@ userApp.get('/:id', protect, async (req, res, next) => {
 })
 
 // update profile (protected — own profile only)
-userApp.put('/:id', protect, async (req, res, next) => {
+userApp.put('/:id', protect, upload.single('profilePicture'), async (req, res, next) => {
+  let uploadedProfilePicture = null
+
   try {
     if (req.params.id !== req.user._id.toString()) {
       return res.status(403).json({ message: "Not allowed to edit another user's profile" })
     }
     const { bio, username } = req.body
+    const updatedFields = {}
+
+    if (typeof username !== 'undefined') {
+      updatedFields.username = username.trim()
+    }
+
+    if (typeof bio !== 'undefined') {
+      updatedFields.bio = bio.trim()
+    }
+
+    if (req.file) {
+      uploadedProfilePicture = await uploadImage(req.file)
+      updatedFields.profilePicture = uploadedProfilePicture.secure_url
+      updatedFields.profilePicturePublicId = uploadedProfilePicture.public_id
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
-      { bio, username },
+      updatedFields,
       { new: true, runValidators: true }
     )
+
+    if (req.file && req.user.profilePicturePublicId && req.user.profilePicturePublicId !== uploadedProfilePicture?.public_id) {
+      try {
+        await deleteCloudinaryImage(req.user.profilePicturePublicId)
+      } catch {
+        // Best-effort cleanup, keep the profile update successful.
+      }
+    }
+
     res.status(200).json({ message: 'profile updated', payload: updatedUser })
-  } catch (err) { next(err) }
+  } catch (err) {
+    if (uploadedProfilePicture?.public_id) {
+      try {
+        await deleteCloudinaryImage(uploadedProfilePicture.public_id)
+      } catch {
+        // Ignore cleanup failures.
+      }
+    }
+    next(err)
+  }
 })
 
 // follow / unfollow toggle (protected)

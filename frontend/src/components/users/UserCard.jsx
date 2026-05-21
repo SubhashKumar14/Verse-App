@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { toggleFollow } from '../../services/userService'
-import { userCard, userAvatar, followBtn, followBtnFollow, followBtnUnfollow, mutedText } from '../../styles/common'
+import { userCard, followBtn, followBtnFollow, followBtnUnfollow, mutedText } from '../../styles/common'
 import toast from 'react-hot-toast'
+import Avatar from '../common/Avatar'
 
 const UserCard = ({ userData, showFollow = true }) => {
   const { user } = useAuth()
@@ -29,14 +30,18 @@ const UserCard = ({ userData, showFollow = true }) => {
   }
 
   return (
-    <Link to={`/profile/${userData._id}`} className={userCard} aria-label={`View ${userData.username}'s profile`}>
-      <div className={userAvatar}>
-        {userData.username?.charAt(0).toUpperCase()}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-[var(--text)] text-[14px] truncate">{userData.username}</p>
-        {userData.bio && <p className={`${mutedText} truncate text-[13px] leading-snug mt-0.5`}>{userData.bio}</p>}
-      </div>
+    <div className={userCard} aria-label={`View ${userData.username}'s profile`}>
+      <Link to={`/profile/${userData._id}`} className="flex flex-1 items-center gap-3 min-w-0">
+        <Avatar
+          src={userData.profilePicture}
+          name={userData.username}
+          sizeClassName="w-10 h-10"
+        />
+        <div className="min-w-0">
+          <p className="font-semibold text-(--text) text-[14px] truncate">{userData.username}</p>
+          {userData.bio && <p className={`${mutedText} truncate text-[13px] leading-snug mt-0.5`}>{userData.bio}</p>}
+        </div>
+      </Link>
       {showFollow && !isSelf && (
         <button
           onClick={handleFollow}
@@ -47,7 +52,7 @@ const UserCard = ({ userData, showFollow = true }) => {
           {following ? 'Unfollow' : 'Follow'}
         </button>
       )}
-    </Link>
+    </div>
   )
 }
 

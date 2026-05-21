@@ -11,56 +11,43 @@ export const useAuth = () => {
 }
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]     = useState(null)
-  const [token, setToken]   = useState(localStorage.getItem('token'))
+  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // On mount — if token exists, fetch the authenticated user
   useEffect(() => {
+    let isMounted = true
+
     const initAuth = async () => {
-      if (!token) {
-        setLoading(false)
-        return
-      }
       try {
         const { data } = await authService.getAuthUser()
-        setUser(data.payload)
+        if (isMounted) setUser(data.payload)
       } catch {
-        // token is invalid or expired
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        setToken(null)
-        setUser(null)
+        if (isMounted) setUser(null)
       } finally {
-        setLoading(false)
+        if (isMounted) setLoading(false)
       }
     }
+
     initAuth()
-  }, [token])
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const login = async (credentials) => {
     const { data } = await authService.login(credentials)
-    localStorage.setItem('token', data.token)
-    localStorage.setItem('user', JSON.stringify(data.payload))
-    setToken(data.token)
     setUser(data.payload)
     return data
   }
 
   const register = async (userData) => {
     const { data } = await authService.register(userData)
-    localStorage.setItem('token', data.token)
-    localStorage.setItem('user', JSON.stringify(data.payload))
-    setToken(data.token)
     setUser(data.payload)
     return data
   }
 
   const logout = async () => {
     try { await authService.logout() } catch { /* ignore */ }
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    setToken(null)
     setUser(null)
   }
 
@@ -68,12 +55,15 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await authService.getAuthUser()
       setUser(data.payload)
-      localStorage.setItem('user', JSON.stringify(data.payload))
-    } catch { /* ignore */ }
+      return data.payload
+    } catch {
+      setUser(null)
+      return null
+    }
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, refreshUser, setUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser, setUser }}>
       {children}
     </AuthContext.Provider>
   )

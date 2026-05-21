@@ -7,12 +7,12 @@ import MobileFAB from './MobileFAB'
 
 const MainLayout = () => {
   return (
-    <div className="bg-[var(--bg)] text-[var(--text)] h-screen flex flex-col overflow-hidden">
+    <div className="bg-(--bg) text-(--text) h-screen flex flex-col overflow-hidden">
       {/* Mobile-only top bar */}
       <Navbar />
       
       {/* Main 3-column layout */}
-      <div className="flex-1 overflow-hidden w-full max-w-[1400px] mx-auto px-0 md:px-6 lg:px-8 flex justify-center">
+      <div className="flex-1 min-h-0 overflow-hidden w-full px-0 md:px-4 lg:px-6 flex">
         
         {/* Left Navigation Rail */}
         <div className="hidden md:block w-52 shrink-0 h-full overflow-y-auto no-scrollbar py-6 pr-2">

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -10,37 +10,27 @@ import VerselyWordmark from '../components/common/VerselyWordmark'
 import logo from '../assets/versely_logo.png'
 
 const Register = () => {
-  const { register } = useAuth()
+  const { register: registerAccount } = useAuth()
   const navigate = useNavigate()
-  const [form, setForm] = useState({ username: '', email: '', password: '' })
-  const [errors, setErrors] = useState({})
-  const [loading, setLoading] = useState(false)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      username: '',
+      email: '',
+      password: '',
+    },
+  })
 
-  const validate = () => {
-    const errs = {}
-    if (!form.username.trim()) errs.username = 'Username is required'
-    else if (form.username.length < 3) errs.username = 'Min 3 characters'
-    if (!form.email.trim()) errs.email = 'Email is required'
-    else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Invalid email'
-    if (!form.password) errs.password = 'Password is required'
-    else if (form.password.length < 6) errs.password = 'Min 6 characters'
-    setErrors(errs)
-    return Object.keys(errs).length === 0
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!validate()) return
-
-    setLoading(true)
+  const onSubmit = async (values) => {
     try {
-      await register(form)
+      await registerAccount(values)
       toast.success('Account created!')
       navigate('/')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -58,45 +48,60 @@ const Register = () => {
 
         <div className={formCard}>
           <h2 className={formTitle}>Start writing</h2>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div className={formGroup}>
               <label className={labelClass}>Username</label>
               <input
                 type="text"
                 autoComplete="username"
-                value={form.username}
-                onChange={(e) => setForm({ ...form, username: e.target.value })}
                 className={inputClass}
                 placeholder="johndoe"
+                {...register('username', {
+                  required: 'Username is required',
+                  minLength: {
+                    value: 3,
+                    message: 'Min 3 characters',
+                  },
+                })}
               />
-              {errors.username && <p className={formError}>{errors.username}</p>}
+              {errors.username && <p className={formError}>{errors.username.message}</p>}
             </div>
             <div className={formGroup}>
               <label className={labelClass}>Email</label>
               <input
                 type="email"
                 autoComplete="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className={inputClass}
                 placeholder="you@example.com"
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /\S+@\S+\.\S+/, 
+                    message: 'Invalid email',
+                  },
+                })}
               />
-              {errors.email && <p className={formError}>{errors.email}</p>}
+              {errors.email && <p className={formError}>{errors.email.message}</p>}
             </div>
             <div className={formGroup}>
               <label className={labelClass}>Password</label>
               <input
                 type="password"
                 autoComplete="new-password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className={inputClass}
                 placeholder="••••••••"
+                {...register('password', {
+                  required: 'Password is required',
+                  minLength: {
+                    value: 6,
+                    message: 'Min 6 characters',
+                  },
+                })}
               />
-              {errors.password && <p className={formError}>{errors.password}</p>}
+              {errors.password && <p className={formError}>{errors.password.message}</p>}
             </div>
-            <button type="submit" disabled={loading} className={submitBtn}>
-              {loading ? 'Creating account...' : 'Sign Up'}
+            <button type="submit" disabled={isSubmitting} className={submitBtn}>
+              {isSubmitting ? 'Creating account...' : 'Sign Up'}
             </button>
           </form>
           <p className={`${mutedText} text-center mt-6`}>

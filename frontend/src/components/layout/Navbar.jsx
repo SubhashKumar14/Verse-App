@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { HiLogout } from 'react-icons/hi'
 import VerselyWordmark from '../common/VerselyWordmark'
+import Avatar from '../common/Avatar'
 import logo from '../../assets/versely_logo.png'
 import {
   navbarClass, navContainerClass, navBrandClass,
@@ -30,9 +31,11 @@ const Navbar = () => {
         {user && (
           <div className="flex items-center gap-1.5">
             <Link to={`/profile/${user._id}`} title="Profile">
-              <div className="w-8 h-8 rounded-full bg-[var(--accent)] text-[var(--accent-ink)] flex items-center justify-center font-semibold text-xs cursor-pointer hover:opacity-90 transition-all duration-200">
-                {user.username?.charAt(0).toUpperCase()}
-              </div>
+              <Avatar
+                src={user.profilePicture}
+                name={user.username}
+                sizeClassName="w-8 h-8"
+              />
             </Link>
             <button onClick={handleLogout} className={iconBtn} title="Logout" aria-label="Log out">
               <HiLogout className="text-xl" />

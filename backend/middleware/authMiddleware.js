@@ -9,8 +9,10 @@ import { User } from '../models/User.js'
 export const protect = async (req, res, next) => {
   let token
 
-  // token must be in the Authorization header as: Bearer <token>
-  if (
+  // Prefer the auth cookie, but keep bearer support for compatibility.
+  if (req.cookies?.token) {
+    token = req.cookies.token
+  } else if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {

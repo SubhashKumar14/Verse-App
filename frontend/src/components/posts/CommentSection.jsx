@@ -3,11 +3,12 @@ import { useAuth } from '../../context/AuthContext'
 import { getComments, addComment, softDeleteComment } from '../../services/commentService'
 import { HiTrash } from 'react-icons/hi'
 import {
-  commentCard, commentAvatar, commentBody, commentUsername,
+  commentCard, commentBody, commentUsername,
   commentText, commentTime, inputClass, primaryBtn, mutedText
 } from '../../styles/common'
 import toast from 'react-hot-toast'
 import LoadingSpinner from '../common/LoadingSpinner'
+import Avatar from '../common/Avatar'
 
 const formatTime = (date) => {
   const diff = Date.now() - new Date(date).getTime()
@@ -70,7 +71,7 @@ const CommentSection = ({ postId }) => {
 
   return (
     <div className="mt-6">
-      <h3 className="text-xs font-semibold uppercase tracking-[0.06em] text-[var(--muted)] mb-4">
+      <h3 className="text-xs font-semibold uppercase tracking-[0.06em] text-(--muted) mb-4">
         Comments ({comments.length})
       </h3>
 
@@ -80,13 +81,15 @@ const CommentSection = ({ postId }) => {
           const author = c.author || {}
           return (
             <div key={c._id} className={`${commentCard} group`}>
-              <div className={commentAvatar}>
-                {author.username?.charAt(0).toUpperCase()}
-              </div>
+              <Avatar
+                src={author.profilePicture}
+                name={author.username}
+                sizeClassName="w-8 h-8"
+              />
               <div className={commentBody}>
                 <div className="flex items-center gap-2">
                   <span className={commentUsername}>{author.username}</span>
-                  <span className="text-[var(--muted)] text-[11px] select-none">·</span>
+                  <span className="text-(--muted) text-[11px] select-none">·</span>
                   <span className={commentTime}>{formatTime(c.createdAt)}</span>
                 </div>
                 <p className={commentText}>{c.text}</p>
@@ -95,7 +98,7 @@ const CommentSection = ({ postId }) => {
                 <button
                   onClick={() => handleDelete(c._id)}
                   aria-label="Delete comment"
-                  className="text-[var(--muted)] hover:text-[var(--danger)] transition-all duration-200 cursor-pointer p-1.5 shrink-0 rounded-lg opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                  className="text-(--muted) hover:text-(--danger) transition-all duration-200 cursor-pointer p-1.5 shrink-0 rounded-lg opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
                 >
                   <HiTrash className="text-sm" />
                 </button>

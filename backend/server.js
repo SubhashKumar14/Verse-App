@@ -1,5 +1,8 @@
 import express from 'express'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { connectDB } from './config/db.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { userApp }    from './api/usersApi.js'
@@ -7,7 +10,11 @@ import { postApp }    from './api/postsApi.js'
 import { commentApp } from './api/commentsApi.js'
 import { commonApp }  from './api/commonApi.js'
 import dotenv from 'dotenv'
-dotenv.config()
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+dotenv.config({ path: path.join(__dirname, '.env') })
 
 const app = express()
 
@@ -15,16 +22,13 @@ const app = express()
 connectDB()
 
 // ─── Middleware ───────────────────────────────────────────────────────────
-app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173' }))
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  credentials: true,
+}))
+app.use(cookieParser())
 app.use(express.json())                        // parse JSON request bodies
 app.use(express.urlencoded({ extended: true })) // parse form data
-
-// Serve uploads folder statically
-import path from 'path'
-import { fileURLToPath } from 'url'
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 // ─── Routes ──────────────────────────────────────────────────────────────
 app.use('/api/users',    userApp)

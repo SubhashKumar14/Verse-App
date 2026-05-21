@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -12,33 +12,24 @@ import logo from '../assets/versely_logo.png'
 const Login = () => {
   const { login } = useAuth()
   const navigate = useNavigate()
-  const [form, setForm] = useState({ email: '', password: '' })
-  const [errors, setErrors] = useState({})
-  const [loading, setLoading] = useState(false)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  })
 
-  const validate = () => {
-    const errs = {}
-    if (!form.email.trim()) errs.email = 'Email is required'
-    else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Invalid email'
-    if (!form.password) errs.password = 'Password is required'
-    else if (form.password.length < 6) errs.password = 'Min 6 characters'
-    setErrors(errs)
-    return Object.keys(errs).length === 0
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!validate()) return
-
-    setLoading(true)
+  const onSubmit = async (values) => {
     try {
-      await login(form)
+      await login(values)
       toast.success('Welcome back!')
       navigate('/')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -56,33 +47,43 @@ const Login = () => {
 
         <div className={formCard}>
           <h2 className={formTitle}>Welcome back</h2>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div className={formGroup}>
               <label className={labelClass}>Email</label>
               <input
                 type="email"
                 autoComplete="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className={inputClass}
                 placeholder="you@example.com"
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /\S+@\S+\.\S+/, 
+                    message: 'Invalid email',
+                  },
+                })}
               />
-              {errors.email && <p className={formError}>{errors.email}</p>}
+              {errors.email && <p className={formError}>{errors.email.message}</p>}
             </div>
             <div className={formGroup}>
               <label className={labelClass}>Password</label>
               <input
                 type="password"
                 autoComplete="current-password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className={inputClass}
                 placeholder="••••••••"
+                {...register('password', {
+                  required: 'Password is required',
+                  minLength: {
+                    value: 6,
+                    message: 'Min 6 characters',
+                  },
+                })}
               />
-              {errors.password && <p className={formError}>{errors.password}</p>}
+              {errors.password && <p className={formError}>{errors.password.message}</p>}
             </div>
-            <button type="submit" disabled={loading} className={submitBtn}>
-              {loading ? 'Signing in...' : 'Sign In'}
+            <button type="submit" disabled={isSubmitting} className={submitBtn}>
+              {isSubmitting ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
           <p className={`${mutedText} text-center mt-6`}>

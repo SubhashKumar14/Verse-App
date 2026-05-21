@@ -25,9 +25,9 @@ const Sidebar = () => {
   return (
     <aside className={`${sidebarClass} h-full`} aria-label="Main navigation">
       {/* Brand */}
-      <Link to="/home" className="flex items-center gap-3 px-3 mb-8">
-        <img src={logo} alt="VerseLy" className="h-10 w-10 object-contain" />
-        <VerselyWordmark size="lg" />
+      <Link to="/home" className="flex items-center gap-2.5 px-3 mb-8">
+        <img src={logo} alt="VerseLy" className="h-9 w-9 object-contain" />
+        <VerselyWordmark size="md" />
       </Link>
 
       {/* Navigation Links */}

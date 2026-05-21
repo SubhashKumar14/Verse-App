@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema(
       default: '',        // Cloudinary secure_url stored here
     },
 
+    profilePicturePublicId: {
+      type:    String,
+      default: '',
+    },
+
     coverPhoto: {
       type:    String,
       default: '',

@@ -4,6 +4,7 @@ import upload from '../middleware/uploadMiddleware.js'
 import { Post } from '../models/Post.js'
 import { User } from '../models/User.js'
 import { Comment } from '../models/Comment.js'
+import { deleteCloudinaryImage, uploadImage } from '../services/mediaService.js'
 
 export const postApp = express.Router()
 
@@ -60,29 +61,43 @@ postApp.get('/:id', protect, async (req, res, next) => {
 
 // create post (protected + optional image upload)
 postApp.post('/', protect, upload.single('image'), async (req, res, next) => {
+  let uploadedImage = null
+
   try {
     const { content } = req.body
     if ((!content || content.trim() === '') && !req.file) {
       return res.status(400).json({ message: 'Post content or image is required' })
     }
     
-    // Check if image was uploaded locally
     let imageUrl = null
+    let imagePublicId = null
+
     if (req.file) {
-      // Local path convention
-      imageUrl = `/uploads/${req.file.filename}`
+      uploadedImage = await uploadImage(req.file)
+      imageUrl = uploadedImage.secure_url
+      imagePublicId = uploadedImage.public_id
     }
 
     const post = await Post.create({ 
       author: req.user._id, 
       content: content ? content.trim() : '',
-      imageUrl 
+      imageUrl,
+      imagePublicId,
     })
     
     await User.findByIdAndUpdate(req.user._id, { $inc: { postsCount: 1 } })
     const populatedPost = await post.populate('author', 'username profilePicture')
     res.status(201).json({ message: 'post created', payload: populatedPost })
-  } catch (err) { next(err) }
+  } catch (err) {
+    if (uploadedImage?.public_id) {
+      try {
+        await deleteCloudinaryImage(uploadedImage.public_id)
+      } catch {
+        // Ignore cleanup failures.
+      }
+    }
+    next(err)
+  }
 })
 
 // soft delete post (protected — owner only)

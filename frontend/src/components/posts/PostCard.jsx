@@ -4,10 +4,11 @@ import { useAuth } from '../../context/AuthContext'
 import { likePost, softDeletePost } from '../../services/postService'
 import { HiHeart, HiOutlineHeart, HiChat, HiTrash } from 'react-icons/hi'
 import {
-  postCard, postAuthorRow, postAvatar, postUsername, postTime,
+  postCard, postAuthorRow, postUsername, postTime,
   postContent, postActions, postActionBtn, postActionBtnActive
 } from '../../styles/common'
 import toast from 'react-hot-toast'
+import Avatar from '../common/Avatar'
 
 const formatTime = (date) => {
   const diff = Date.now() - new Date(date).getTime()
@@ -59,14 +60,18 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
     <div className={`${postCard} group`}>
       {/* Author row — avatar, username · time inline */}
       <div className={postAuthorRow}>
-        <Link to={`/profile/${author._id}`} className={postAvatar} aria-label={`${author.username}'s profile`}>
-          {author.username?.charAt(0).toUpperCase()}
+        <Link to={`/profile/${author._id}`} aria-label={`${author.username}'s profile`} className="shrink-0">
+          <Avatar
+            src={author.profilePicture}
+            name={author.username}
+            sizeClassName="w-10 h-10"
+          />
         </Link>
         <div className="flex-1 min-w-0 flex items-center gap-2">
           <Link to={`/profile/${author._id}`} className={postUsername}>
             {author.username}
           </Link>
-          <span className="text-[var(--muted)] text-xs select-none">·</span>
+          <span className="text-(--muted) text-xs select-none">·</span>
           <span className={postTime}>{formatTime(post.createdAt)}</span>
         </div>
         {isOwner && (
@@ -74,7 +79,7 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
             onClick={handleDelete}
             disabled={deleting}
             aria-label="Archive post"
-            className="text-[var(--muted)] hover:text-[var(--danger)] transition-all duration-200 cursor-pointer p-1.5 rounded-lg -mr-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+            className="text-(--muted) hover:text-(--danger) transition-all duration-200 cursor-pointer p-1.5 rounded-lg -mr-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
           >
             <HiTrash className="text-[15px]" />
           </button>
@@ -96,10 +101,10 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
           <div className="mt-4">
             {showLink ? (
               <Link to={`/post/${post._id}`}>
-                <img src={post.imageUrl} alt="Post attachment" className="rounded-xl w-full object-cover max-h-[500px]" />
+                <img src={post.imageUrl} alt="Post attachment" className="rounded-xl w-full object-cover max-h-125" />
               </Link>
             ) : (
-              <img src={post.imageUrl} alt="Post attachment" className="rounded-xl w-full object-cover max-h-[500px]" />
+              <img src={post.imageUrl} alt="Post attachment" className="rounded-xl w-full object-cover max-h-125" />
             )}
           </div>
         )}

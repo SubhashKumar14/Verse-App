@@ -22,8 +22,17 @@ const app = express()
 connectDB()
 
 // ─── Middleware ───────────────────────────────────────────────────────────
+// Allow multiple origins via comma-separated CORS_ORIGIN env var.
+const rawOrigins = process.env.CORS_ORIGIN || 'http://localhost:5173'
+const allowedOrigins = rawOrigins.split(',').map(s => s.trim())
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // allow requests with no origin (e.g., curl, server-side)
+    if (!origin) return callback(null, true)
+    if (allowedOrigins.includes(origin)) return callback(null, true)
+    return callback(new Error('CORS origin not allowed'), false)
+  },
   credentials: true,
 }))
 app.use(cookieParser())

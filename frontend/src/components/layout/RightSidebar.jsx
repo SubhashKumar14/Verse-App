@@ -1,53 +1,55 @@
 import { useState, useEffect } from 'react'
-import { searchUsers } from '../../services/userService'
+import { getTrendingTags, getRecommendedUsers } from '../../services/postService'
 import UserCard from '../users/UserCard'
 import LoadingSpinner from '../common/LoadingSpinner'
 import { mutedText, sectionLabel, topicPill } from '../../styles/common'
 
-const trendingTopics = [
-  '#buildinpublic',
-  '#devlife',
-  '#writing',
-  '#opensource',
-  '#design',
-  '#indie',
-]
-
 const RightSidebar = () => {
   const [recommendations, setRecommendations] = useState([])
+  const [trending, setTrending] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchRecommendations = async () => {
+    const fetchSidebarData = async () => {
       try {
-        const { data } = await searchUsers('')
-        setRecommendations(data.payload.slice(0, 4))
+        const [tagsRes, usersRes] = await Promise.all([
+          getTrendingTags(),
+          getRecommendedUsers()
+        ])
+        setTrending(tagsRes.data.payload || [])
+        setRecommendations(usersRes.data.payload || [])
       } catch {
         // silently fail — sidebar is non-critical
       } finally {
         setLoading(false)
       }
     }
-    fetchRecommendations()
+    fetchSidebarData()
   }, [])
 
   return (
     <aside className="w-full space-y-8" aria-label="Discover on VerseLy">
       {/* Trending */}
       <section>
-        <p className={`${sectionLabel} px-1 mb-3`}>Trending</p>
-        <div className="flex flex-wrap gap-2 px-1">
-          {trendingTopics.map((topic) => (
-            <span key={topic} className={topicPill}>
-              {topic}
-            </span>
-          ))}
-        </div>
+        <p className={`${sectionLabel} px-1 mb-3`}>Trending Tags</p>
+        {loading ? (
+          <div className="py-2"><LoadingSpinner size="sm" /></div>
+        ) : trending.length > 0 ? (
+          <div className="flex flex-wrap gap-2 px-1">
+            {trending.map((topic) => (
+              <span key={topic} className={topicPill}>
+                {topic}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className={`${mutedText} text-xs py-2 px-1`}>No trending tags today.</p>
+        )}
       </section>
 
       {/* Writers */}
       <section>
-        <p className={`${sectionLabel} px-1 mb-3`}>Writers</p>
+        <p className={`${sectionLabel} px-1 mb-3`}>Recommended Writers</p>
         {loading ? (
           <div className="py-4"><LoadingSpinner size="sm" /></div>
         ) : recommendations.length > 0 ? (
@@ -64,7 +66,7 @@ const RightSidebar = () => {
       {/* About */}
       <section className="px-1 pt-2 border-t border-[var(--border)]">
         <p className={`${mutedText} text-xs leading-relaxed`}>
-          VerseLy — A calmer place for thoughtful writing.
+          Verse — A personalized social experience.
         </p>
       </section>
     </aside>
@@ -72,3 +74,4 @@ const RightSidebar = () => {
 }
 
 export default RightSidebar
+

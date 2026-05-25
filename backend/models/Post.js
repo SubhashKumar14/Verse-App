@@ -25,24 +25,42 @@ const postSchema = new mongoose.Schema(
       default: null,      // Cloudinary public_id — needed to delete the image
     },
 
-    // Array of user IDs who liked this post
-    // likesCount = likes.length, isLiked = likes.includes(currentUserId)
-    likes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref:  'User',
-      },
-    ],
+    likesCount: {
+      type:    Number,
+      default: 0,
+    },
 
-    // soft delete flag — deleted posts are hidden from queries, not removed from DB
-    isDeleted: {
-      type:    Boolean,
-      default: false,
+    bookmarksCount: {
+      type:    Number,
+      default: 0,
     },
 
     commentsCount: {
       type:    Number,
       default: 0,
+    },
+
+    category: {
+      type:     String,
+      required: [true, 'Post must belong to a category'],
+      trim:     true,
+    },
+
+    hashtags: [
+      {
+        type: String,
+        trim: true,
+      }
+    ],
+
+    embedding: {
+      type:    [Number],
+      default: [],
+    },
+
+    isDeleted: {
+      type:    Boolean,
+      default: false,
     },
   },
   {
@@ -51,13 +69,17 @@ const postSchema = new mongoose.Schema(
   }
 )
 
-// virtual: likesCount from the array length
-postSchema.virtual('likesCount').get(function () {
-  return this.likes.length
-})
+// Indexes
+postSchema.index({ isDeleted: 1, author: 1, createdAt: -1 })
+postSchema.index({ category: 1, isDeleted: 1 })
+postSchema.index({ hashtags: 1, isDeleted: 1 })
+postSchema.index({ createdAt: -1 })
 
-// indexes
-postSchema.index({ createdAt: -1 })            // feed sorted newest first
-postSchema.index({ author: 1, createdAt: -1 }) // profile page posts
+// Text index for content, hashtags, and category search
+postSchema.index({
+  content:  'text',
+  hashtags: 'text',
+  category: 'text',
+})
 
 export const Post = mongoose.model('Post', postSchema)

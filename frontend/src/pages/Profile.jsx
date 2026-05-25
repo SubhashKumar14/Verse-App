@@ -7,6 +7,7 @@ import PostCard from '../components/posts/PostCard'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import EmptyState from '../components/common/EmptyState'
 import Avatar from '../components/common/Avatar'
+import FollowModal from '../components/users/FollowModal'
 import {
   profileHeader, profileName, profileBio,
   profileStat, profileStatNumber, profileStatLabel,
@@ -21,6 +22,7 @@ const Profile = () => {
   const [posts, setPosts] = useState([])
   const [isFollowing, setIsFollowing] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [activeModal, setActiveModal] = useState(null)
 
   const isSelf = currentUser?._id === id
 
@@ -50,9 +52,7 @@ const Profile = () => {
       setIsFollowing(data.following)
       setProfile((p) => ({
         ...p,
-        followers: data.following
-          ? [...(p.followers || []), currentUser._id]
-          : (p.followers || []).filter((f) => f !== currentUser._id),
+        followersCount: data.followersCount,
       }))
     } catch {
       toast.error('Failed to toggle follow')
@@ -95,18 +95,28 @@ const Profile = () => {
             </div>
             {profile.bio && <p className={profileBio}>{profile.bio}</p>}
             <div className="flex gap-8 mt-6 justify-center sm:justify-start">
-              <div className={profileStat}>
+              <div className="flex items-baseline gap-1.5">
                 <span className={profileStatNumber}>{profile.postsCount || 0}</span>
                 <span className={profileStatLabel}>Posts</span>
               </div>
-              <div className={profileStat}>
-                <span className={profileStatNumber}>{profile.followers?.length || profile.followersCount || 0}</span>
+              <button
+                type="button"
+                onClick={() => setActiveModal('followers')}
+                className={`${profileStat} bg-transparent border-none p-0 text-left`}
+                aria-label="View followers list"
+              >
+                <span className={profileStatNumber}>{profile.followersCount || 0}</span>
                 <span className={profileStatLabel}>Followers</span>
-              </div>
-              <div className={profileStat}>
-                <span className={profileStatNumber}>{profile.following?.length || profile.followingCount || 0}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveModal('following')}
+                className={`${profileStat} bg-transparent border-none p-0 text-left`}
+                aria-label="View following list"
+              >
+                <span className={profileStatNumber}>{profile.followingCount || 0}</span>
                 <span className={profileStatLabel}>Following</span>
-              </div>
+              </button>
             </div>
           </div>
         </div>
@@ -122,6 +132,15 @@ const Profile = () => {
             <PostCard key={post._id} post={post} onDelete={handlePostDeleted} />
           ))}
         </div>
+      )}
+
+      {/* Followers/Following Modal */}
+      {activeModal && (
+        <FollowModal
+          userId={id}
+          type={activeModal}
+          onClose={() => setActiveModal(null)}
+        />
       )}
     </div>
   )

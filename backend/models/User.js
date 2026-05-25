@@ -51,24 +51,31 @@ const userSchema = new mongoose.Schema(
       default: '',
     },
 
-    // store ObjectId arrays for follow relationships
-    following: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref:  'User',
-      },
-    ],
-
-    followers: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref:  'User',
-      },
-    ],
-
     postsCount: {
       type:    Number,
       default: 0,
+    },
+
+    followersCount: {
+      type:    Number,
+      default: 0,
+    },
+
+    followingCount: {
+      type:    Number,
+      default: 0,
+    },
+
+    interestScores: {
+      type:    Map,
+      of:      Number,
+      default: {},
+    },
+
+    privacy: {
+      type:    String,
+      enum:    ['public', 'private', 'followers_only'],
+      default: 'public',
     },
   },
   {
@@ -77,14 +84,8 @@ const userSchema = new mongoose.Schema(
   }
 )
 
-// virtuals: computed on the fly, not stored in DB
-userSchema.virtual('followersCount').get(function () {
-  return this.followers?.length || 0
-})
-
-userSchema.virtual('followingCount').get(function () {
-  return this.following?.length || 0
-})
+// Index for text-based profile search
+userSchema.index({ username: 'text', bio: 'text' })
 
 // pre-save hook: hash password before storing
 userSchema.pre('save', async function () {

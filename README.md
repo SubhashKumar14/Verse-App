@@ -1,235 +1,285 @@
-# VerseLy
+# 🌌 Verse — AI-Powered Social Media Discovery Platform
 
-VerseLy is a MERN stack social writing app built for short-form, text-first publishing. The product is designed around calm reading, fast posting, thoughtful profiles, and a warm editorial interface rather than engagement bait or noisy social mechanics.
+Verse is a modern full-stack social media ecosystem inspired by Twitter/X, Instagram Explore, Threads, and TikTok recommendation graphs. Built on the MERN stack, it features a scalable MongoDB architecture, personalized content feeds, an interactive interest-based onboarding system, and realistic social graph simulation.
 
-## What The App Does
+---
 
-- Public landing page with clear calls to action for sign in and sign up.
-- Cookie-based authentication with automatic session restore.
-- Protected home feed with text posts, image posts, likes, comments, and user profiles.
-- Follow and unfollow support for a simple social graph.
-- Search, archives, and settings screens for managing the writing experience.
-- Profile photo uploads and post image uploads stored in Cloudinary.
-- Responsive desktop and mobile layout with a shared shell, side rails, and bottom navigation.
+## 🚀 Live Demo
+* **Frontend Application**: [https://your-frontend-url](https://your-frontend-url)
+* **Backend API Gateway**: [https://your-backend-url](https://your-backend-url)
 
-## Architecture
+---
+
+## 🎨 System Architecture Overview
 
 ```mermaid
-flowchart LR
-  Browser[Browser] --> Frontend[React + Vite Frontend]
-  Frontend <-->|/api requests + cookies| Backend[Express API]
-  Backend --> Mongo[(MongoDB)]
-  Backend --> Cloudinary[(Cloudinary)]
+flowchart TD
+  subgraph Frontend UI [React.js & Tailwind CSS Client]
+    A[Browser Client] -->|HTTP Credentials & Session Cookie| B[React App Shell]
+    B -->|Navigation| B1[For You / Following / Trending Feeds]
+    B -->|Settings| B2[Interests Onboarding]
+    B -->|Interests| B3[Notifications Panel]
+  end
+
+  subgraph Backend API [Node.js & Express Service]
+    C[Express Router] -->|JWT Validation Middleware| D[Controller Routes]
+    D -->|Media Processing| E[Cloudinary Service Wrapper]
+    D -->|Data Querying| F[Mongoose ODM]
+  end
+
+  subgraph Database Layer [MongoDB Cluster / Local Instance]
+    F --> G[(User Collection)]
+    F --> H[(Post Collection)]
+    F --> I[(Comment Collection)]
+    F --> J[(Follow Graph)]
+    F --> K[(Likes Junction)]
+    F --> L[(Bookmarks Junction)]
+    F --> M[(Notification Queue)]
+  end
+
+  A <-->|API Calls & CORS| C
 ```
 
-The repository is split into two applications:
+---
 
-- `backend/` owns routes, services, middleware, models, file handling, and the MongoDB connection.
-- `frontend/` owns routing, shared state, presentation components, form flows, and the client-side shell.
+## 📸 Screenshots
 
-## Tech Stack
+| Home Feed | For You Feed | Explore Feed |
+| :---: | :---: | :---: |
+| ![Home Feed](./frontend/src/assets/home.png) | ![For You Feed](./frontend/src/assets/foryoupage.png) | ![Explore Feed](./frontend/src/assets/explorepage.png) |
 
-| Layer | Technologies |
-|---|---|
-| Frontend | React 19, Vite, React Router, Axios, react-hook-form, react-hot-toast, React Icons, Tailwind CSS |
-| Backend | Node.js, Express, Mongoose, JSON Web Tokens, cookie-parser, Multer, Cloudinary |
-| Storage | MongoDB for application data, Cloudinary for images |
+| User Profile | Trending & Recommendations | Notifications Panel |
+| :---: | :---: | :---: |
+| ![User Profile](./frontend/src/assets/profilepage.png) | ![Trending & Recommendations](./frontend/src/assets/recommendations.png) | ![Notifications Panel](./frontend/src/assets/notifications.png) |
 
-## Core Capabilities
+---
 
-### Authentication And Session Handling
+## 🌟 Key Features
 
-- Register and login are handled through the backend auth service.
-- Login and register set an httpOnly token cookie.
-- The frontend restores the session on load by calling the authenticated user endpoint.
-- Logout clears the cookie and resets the client auth state.
+### 🔐 Authentication & Session Security
+* **JWT Cookie Auth**: Secure httpOnly cookie session tracking with automatic state restore.
+* **Onboarding Flow**: Guided interest picker (15 genres) that establishes the user's initial interests graph.
+* **Custom Profile Management**: Cloudinary-backed profile picture and cover photo uploads, editable bios, and counts.
+* **Granular Profile Privacy**: Options for `public`, `private`, or `follower-only` accounts to manage visibility.
 
-### Writing And Social Flow
+### ✍️ Social Interactions
+* **Micro-Posting**: Support for text-only, text-and-image, and image-only posts.
+* **Normalized Graph Operations**: Follow/unfollow, like/unlike, and bookmark/unbookmark features running on dedicated scalability tables.
+* **Threading**: Chronological comments for deep, readable discussion trees.
+* **Real-time Alerts**: Automated activity notifications for likes, comments, and new followers.
 
-- Create posts with text, optional image attachments, and character feedback.
-- Like and unlike posts.
-- Comment on posts in chronological thread order.
-- Follow and unfollow users.
-- Search people by username or email.
+### 📡 The Feed Engine
+* **Following Feed**: A chronological list of posts created by users you follow, including your own posts.
+* **For You Feed**: Personalized recommendations sorted by a hybrid network-relevance score.
+* **Trending Feed**: Global engagement ranking with a time-decay algorithm.
+* **Explore Feed**: Discovery panel highlighting high-performing posts from creators you do *not* follow, sorted by category.
 
-### Archives And Recovery
+---
 
-- Posts and comments use soft delete instead of hard delete.
-- Archived posts and comments can be restored from the Archives screen.
+## 🧠 Recommendation & Feed Ranking Algorithms
 
-### Profile And Media
+Verse utilizes real-time scoring formulas to deliver high-quality, personalized feeds.
 
-- Users can update username, bio, and profile picture.
-- Posts can include an uploaded image.
-- All images are stored in Cloudinary, not in a local uploads folder.
-- Avatars fall back to initials when no photo is available.
+### 1. Global "Trending" Algorithm
+To surface active discussions globally, the system uses an engagement-heavy formula inspired by the Hacker News decay mechanism:
 
-### Interface And Experience
+$$\text{Score} = (\text{likesCount} \times 3) + (\text{commentsCount} \times 5) + (\text{bookmarksCount} \times 4) + \frac{200}{(\text{hoursElapsed} + 2)^{1.2}}$$
 
-- Desktop layout uses a three-column shell with a left rail, feed, and right sidebar.
-- Mobile layout uses a slim top bar and bottom navigation.
-- Theme preference is persisted in localStorage and applied through the HTML `data-theme` attribute.
-- Form handling uses react-hook-form on auth, composer, and settings flows.
+This balances total engagement against post age to maintain fresh, active discussion.
 
-## How It Is Structured
+### 2. Personalized "For You" Algorithm
+The personalization engine evaluates and ranks posts based on user interest profiles and network associations:
 
-### Backend
+$$\text{Personalized Score} = \frac{\text{network\_boost} + \text{interest\_boost} + \text{engagement\_score} + 1}{(\text{hoursElapsed} + 1.5)^{1.0}}$$
 
-- `backend/server.js` bootstraps Express, CORS, cookie parsing, JSON parsing, route mounting, and global error handling.
-- `backend/api/` contains the HTTP route modules for auth, users, posts, and comments.
-- `backend/services/` contains business logic such as auth and media uploads.
-- `backend/middleware/` contains protection and upload middleware.
-- `backend/models/` contains the MongoDB schemas and model rules.
-- `backend/config/` contains database and Cloudinary configuration.
+* **Network Boost**: Adds **+50** points if the post's author is followed by the current user.
+* **Interest Boost**: Adds up to **+50** points based on the current user's profile interests match: `interestScore` (0.0 to 1.0) multiplied by 50.
+* **Engagement Score**: Sums weighted interactions: $(\text{likes} \times 3) + (\text{comments} \times 5) + (\text{bookmarks} \times 4)$.
+* **Decency Decay**: Penalizes older posts to keep content fresh.
 
-### Frontend
+---
 
-- `frontend/src/App.jsx` defines the route tree and shell composition.
-- `frontend/src/context/` stores auth and theme state.
-- `frontend/src/services/` centralizes API access.
-- `frontend/src/components/` contains layout, post, user, and common UI components.
-- `frontend/src/pages/` contains the landing page, auth pages, feed, profile, search, archives, and settings screens.
+## 💾 Scalable Database Schema Design
 
-## Project Structure
+Unlike traditional relational schemas embedded inside user or post documents (which cause MongoDB's 16MB document boundary issues at scale), Verse utilizes a **normalized, high-scale architecture**:
 
-```text
-Verse-App/
-  backend/
-    api/
-    config/
-    middleware/
-    models/
-    services/
-    server.js
-    .env
-  frontend/
-    src/
-      components/
-      context/
-      pages/
-      services/
-      styles/
-    vite.config.js
-    index.html
+```mermaid
+erDiagram
+    User ||--o{ Follow : "follower / following"
+    User ||--o{ Post : "author"
+    User ||--o{ Like : "liker"
+    User ||--o{ Bookmark : "bookmarker"
+    User ||--o{ Notification : "recipient / sender"
+    Post ||--o{ Like : "target"
+    Post ||--o{ Bookmark : "target"
+    Post ||--o{ Comment : "belongs_to"
+    User ||--o{ Comment : "commenter"
 ```
 
-## Local Setup
+### Collection Model Overview
+* **`User`**: Stores identity details, profile counters, and an `interestScores` Map (e.g. `{ football: 0.9, food: 0.2 }`).
+* **`Post`**: Stores authorship, text/image metadata, categories, hashtags, and cached counters (`likesCount`, `commentsCount`, `bookmarksCount`).
+* **`Follow`**: Stores directed social graph edges: `{ follower: ObjectId, following: ObjectId }`.
+* **`Like`**: Stores user-post interaction pairs: `{ user: ObjectId, post: ObjectId }`.
+* **`Bookmark`**: Stores user-post saved pairs: `{ user: ObjectId, post: ObjectId }`.
+* **`Notification`**: Activity queue: `{ recipient, sender, type: 'like'|'comment'|'follow', post }`.
 
-### Prerequisites
+---
 
-- Node.js 18 or newer.
-- MongoDB running locally.
-- A Cloudinary account for image uploads.
+## 🗄️ Dataset System & Seeding
 
-### Install Dependencies
+Verse includes a high-fidelity synthetic seeder (`backend/scripts/seed.js`) that constructs a realistic community ecosystem of **1,500 active accounts** across multiple genres:
 
-This repository does not use a root package.json, so install dependencies in each app folder.
+> [!NOTE]
+> **Genre Segments**: `movies`, `photography`, `art`, `food`, `lifestyle`, `travel`, `football`, `cricket`, `fitness`, `technology`, `gaming`, `books`, `fashion`, `music`, and `nature`.
 
-```bash
-cd backend
-npm install
+### 👥 User Graph Demographics
+* **Lurkers (45%)**: Set up profile, browse categories, read posts, make occasional likes/bookmarks.
+* **Casual Users (35%)**: Post occasionally, follow 20–30 users, write comments.
+* **Creators (15%)**: Write 5–10 posts within their core genres, maintain high follower counts.
+* **Influencers (5%)**: Maintain massive follow graphs, post high-impact content, draw massive engagement.
 
-cd ../frontend
-npm install
-```
+---
 
-### Backend Environment
+## ⚙️ Environment Variables
 
-Create `backend/.env` with your local and Cloudinary values:
+Create a `.env` file inside the `backend/` directory:
 
 ```env
 PORT=5000
 NODE_ENV=development
 
-MONGO_URI=mongodb://localhost:27017/verse-app
+# Database Connection Mode Selection
+# Set to 'local' to connect to local MongoDB, or 'cluster' to connect to MongoDB Atlas
+MONGO_CONNECTION_MODE=cluster
 
-JWT_SECRET=your_jwt_secret_here
+# Connection URIs
+MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/verse
+MONGO_URI_LOCAL=mongodb://127.0.0.1:27017/verse-app
+
+# Session Security
+JWT_SECRET=your_jwt_signing_secret_here
 JWT_EXPIRES_IN=1d
 
+# Client Origin
 CORS_ORIGIN=http://localhost:5173
 
-CLOUDINARY_CLOUD_NAME=your_cloud_name_here
-CLOUDINARY_API_KEY=your_api_key_here
-CLOUDINARY_API_SECRET=your_api_secret_here
-CLOUDINARY_FOLDER=verse-app
+# Cloudinary CDN Configuration
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+CLOUDINARY_FOLDER=Verse_App
 ```
 
-### Run The App In Development
+---
 
-Open two terminals.
+## 🛠️ Local Setup & Installation
 
-Backend:
+### 1. Clone the Repository
+```bash
+git clone https://github.com/SubhashKumar14/Verse-App.git
+cd Verse-App
+```
+
+### 2. Install Project Dependencies
+```bash
+# Install backend dependencies
+cd backend
+npm install
+
+# Install frontend dependencies
+cd ../frontend
+npm install
+```
+
+### 3. Populating the Database (Seeding)
+Run the seeder tool to clear old structures and write clean, safe, recommendation-ready synthetic data. 
+
+> [!TIP]
+> You can choose to seed your local database or cloud cluster by choosing environment configuration or using CLI flags:
 
 ```bash
+# Seed to your local database (Forces local mode)
 cd backend
-node server.js
+node scripts/seed.js --local
+
+# Seed to your MongoDB Atlas cluster (Forces cluster mode)
+node scripts/seed.js --cluster
 ```
 
-If you want auto-reload, use:
+### 4. Running the Development Servers
+Open two separate terminal shells:
 
+**Backend Server**:
 ```bash
 cd backend
-npx nodemon server.js
+npm run dev
 ```
 
-Frontend:
-
+**Frontend Client**:
 ```bash
 cd frontend
 npm run dev
 ```
 
-The Vite dev server proxies `/api` to `http://localhost:5000`, so the client can talk to the backend without browser CORS issues during local development.
+---
 
-### Build For Production
+## 📡 API Endpoint Reference
 
-```bash
-cd frontend
-npm run build
-```
+### 1. Feed & Discover Endpoints
+| HTTP Method | Route | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/posts/for-you` | Fetch personalized feed ranked by user interests and follow graph |
+| `GET` | `/api/posts/following` | Fetch chronological feed of posts from followed accounts |
+| `GET` | `/api/posts/trending` | Fetch global feed sorted by time-decay engagement formula |
+| `GET` | `/api/posts/explore` | Fetch popular posts categorised by user's non-followed topics |
+| `GET` | `/api/posts/trending-tags` | Retrieve dynamic list of hashtags appearing in recent posts |
+| `GET` | `/api/posts/recommended-users` | Fetch account follow suggestions based on interest correlation |
 
-## Backend API Surface
+### 2. Social Interactions
+| HTTP Method | Route | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/posts` | Create a text/media post |
+| `POST` | `/api/posts/:id/like` | Toggle post like state (updates cached counter) |
+| `POST` | `/api/posts/:id/bookmark` | Toggle post bookmark state (updates cached counter) |
+| `POST` | `/api/users/:id/follow` | Toggle follow status of another account |
 
-All routes are mounted under `/api`.
+### 3. User Settings & Onboarding
+| HTTP Method | Route | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/users/onboarding-interests` | Save initial interest map on onboarding completion |
+| `GET` | `/api/users/:username` | Fetch profile information |
 
-| Area | Routes |
-|---|---|
-| Auth | `POST /api/common/register`, `POST /api/common/login`, `POST /api/common/logout`, `GET /api/common/user` |
-| Users | `GET /api/users/search?q=...`, `GET /api/users/:id`, `PUT /api/users/:id`, `POST /api/users/:id/follow`, `GET /api/users/:id/followers`, `GET /api/users/:id/following` |
-| Posts | `GET /api/posts`, `GET /api/posts/user/:id`, `GET /api/posts/:id`, `POST /api/posts`, `PATCH /api/posts/:id`, `POST /api/posts/:id/like`, `GET /api/posts/archives/user`, `PATCH /api/posts/:id/restore` |
-| Comments | `GET /api/comments/:postId`, `POST /api/comments/:postId`, `PATCH /api/comments/:id`, `GET /api/comments/archives/user`, `PATCH /api/comments/:id/restore` |
+### 4. Notifications Panel
+| HTTP Method | Route | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/notifications` | Get social alerts feed |
+| `PATCH`| `/api/notifications/read-all` | Mark all alerts as read |
 
-## Data Model Summary
+---
 
-- `User` stores username, email, hashed password, bio, profile photo, followers, following, and post counts.
-- `Post` stores author, content, optional image, likes, archive state, and comment count.
-- `Comment` stores post reference, author, text, and archive state.
-- Soft delete is used for posts and comments so archived content can be restored later.
+## ☁️ Media Delivery Optimization
+Verse links media uploads directly to **Cloudinary** and optimizes browser loading speeds:
+* **Quality Auto (`q_auto`)**: Compresses images dynamically based on network bandwidth without visible quality loss.
+* **Format Auto (`f_auto`)**: Delivers modern formats (like WebP or AVIF) depending on the browser support footprint.
+* **Transformation Scaling**: Crops and constrains image layouts using Cloudinary parameter strings before delivering assets, minimizing database storage to flat URL paths.
 
-## Deployment Notes
+---
 
-- The frontend expects an API path on `/api`. In development, Vite handles that proxy.
-- The backend uses credentialed CORS and httpOnly cookies, so production deployments should keep the frontend and backend origins aligned and use HTTPS.
-- If the frontend and backend are deployed on separate domains, make sure the API proxy or reverse proxy is configured correctly and `CORS_ORIGIN` matches the frontend origin.
+## 🧠 MongoDB Queries Optimization
+* **Compound Indexes**: Applied on `{ follower: 1, following: 1 }` and `{ post: 1, user: 1 }` for rapid validation.
+* **Aggregations**: Used throughout the recommendation feeds, leveraging Mongoose `$lookup` and `$facet` stages for performance.
+* **Text Indexing**: Enabled on `User` (`username`, `bio`) and `Post` (`content`, `hashtags`, `category`) to support performant keyword discovery.
 
-## Current Notes
+---
 
-- Images are stored in Cloudinary. The old local uploads folder is no longer part of the active app flow.
-- The backend currently starts with `node server.js` or `npx nodemon server.js` from the `backend/` directory.
-- Account deletion is still a UI placeholder.
+## 🔮 Scalability & Future Upgrade Paths
+* **Redis Caching**: Planned implementation for caching user interest graphs and trending feed aggregations.
+* **WebSockets / Socket.io**: Real-time push updates for likes, comments, and direct messaging channels.
+* **Atlas Vector Search**: Prepare the codebase to process unstructured texts into AI vector embeddings to support semantic recommendation indexing.
 
-## Screens In The App
+---
 
-- Landing
-- Login
-- Register
-- Home feed
-- Profile
-- Post detail
-- Search
-- Archives
-- Settings
 
-## Summary
-
-VerseLy is a cleanly separated MERN application with a service-driven backend, a component-driven frontend, cookie-based authentication, Cloudinary media storage, and a responsive reading-and-writing experience built around calm, text-first publishing.
+## 📄 License
+This project is licensed under the **MIT License** - see the LICENSE file for details.

@@ -12,20 +12,20 @@ const MainLayout = () => {
       <Navbar />
       
       {/* Main 3-column layout */}
-      <div className="flex-1 min-h-0 overflow-hidden w-full px-0 md:px-4 lg:px-6 flex">
+      <div className="flex-1 min-h-0 overflow-hidden w-full px-0 flex">
         
         {/* Left Navigation Rail */}
-        <div className="hidden md:block w-52 shrink-0 h-full overflow-y-auto no-scrollbar py-6 pr-2">
+        <div className="hidden md:block w-52 shrink-0 h-full overflow-y-auto no-scrollbar py-6 pl-6 pr-2">
           <Sidebar />
         </div>
         
         {/* Center Feed */}
-        <main className="flex-1 w-full max-w-2xl min-w-0 h-full overflow-y-auto no-scrollbar pb-24 md:pb-6 px-4 md:px-6 pt-4 md:pt-6">
+        <main className="flex-1 w-full min-w-0 h-full overflow-y-auto no-scrollbar pb-24 md:pb-6 px-4 md:px-6 pt-4 md:pt-6">
           <Outlet />
         </main>
         
         {/* Right Contextual Sidebar */}
-        <div className="hidden lg:block w-72 shrink-0 h-full overflow-y-auto no-scrollbar py-6 pl-2">
+        <div className="hidden lg:block w-72 shrink-0 h-full overflow-y-auto no-scrollbar py-6 pl-2 pr-6">
           <RightSidebar />
         </div>
       </div>

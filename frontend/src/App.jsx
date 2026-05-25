@@ -13,6 +13,8 @@ import PostDetail from './pages/PostDetail'
 import Search from './pages/Search'
 import Archives from './pages/Archives'
 import Settings from './pages/Settings'
+import Onboarding from './pages/Onboarding'
+import Notifications from './pages/Notifications'
 
 // Component to handle the root path based on auth state
 const RootRedirect = () => {
@@ -43,6 +45,14 @@ function App() {
             <Route path="/" element={<RootRedirect />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route
+              path="/onboarding"
+              element={
+                <ProtectedRoute>
+                  <Onboarding />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Protected Routes — wrapped in MainLayout */}
             <Route
@@ -58,6 +68,7 @@ function App() {
               <Route path="/search" element={<Search />} />
               <Route path="/archives" element={<Archives />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/notifications" element={<Notifications />} />
             </Route>
 
             {/* Fallback */}

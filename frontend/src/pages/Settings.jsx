@@ -104,7 +104,7 @@ const Settings = () => {
   }
 
   return (
-    <div className="w-full max-w-2xl">
+    <div className="w-full">
       <h1 className={`${pageTitleClass} text-balance`}>Settings</h1>
       <p className={`${pageSubtitle} mb-10`}>Manage your account and preferences.</p>
 

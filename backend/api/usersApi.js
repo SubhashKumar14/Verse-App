@@ -2,6 +2,8 @@ import express from 'express'
 import { protect } from '../middleware/authMiddleware.js'
 import upload from '../middleware/uploadMiddleware.js'
 import { User } from '../models/User.js'
+import { Follow } from '../models/Follow.js'
+import { Notification } from '../models/Notification.js'
 import { deleteCloudinaryImage, uploadImage } from '../services/mediaService.js'
 
 export const userApp = express.Router()
@@ -25,7 +27,47 @@ userApp.get('/search', protect, async (req, res, next) => {
         _id: { $ne: req.user._id },
       }).limit(20)
     }
-    res.status(200).json({ message: 'search results', payload: users })
+
+    // Map to include isFollowing field
+    const userIds = users.map(u => u._id)
+    const activeFollows = await Follow.find({ follower: req.user._id, following: { $in: userIds } })
+    const followedIds = new Set(activeFollows.map(f => f.following.toString()))
+
+    const payload = users.map(u => {
+      const uObj = u.toObject ? u.toObject() : u
+      return {
+        ...uObj,
+        isFollowing: followedIds.has(uObj._id.toString())
+      }
+    })
+
+    res.status(200).json({ message: 'search results', payload })
+  } catch (err) { next(err) }
+})
+
+// onboarding interests (protected)
+userApp.post('/onboarding-interests', protect, async (req, res, next) => {
+  try {
+    const { interests } = req.body
+    if (!interests || !Array.isArray(interests)) {
+      return res.status(400).json({ message: 'Interests array is required' })
+    }
+
+    const interestScores = {}
+    interests.forEach(interest => {
+      const category = interest.toLowerCase().trim()
+      if (category) {
+        interestScores[category] = 1.0
+      }
+    })
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { interestScores },
+      { new: true }
+    )
+
+    res.status(200).json({ message: 'onboarding interests saved', payload: updatedUser })
   } catch (err) { next(err) }
 })
 
@@ -34,7 +76,8 @@ userApp.get('/:id', protect, async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id)
     if (!user) return res.status(404).json({ message: 'User not found' })
-    const isFollowing = user.followers.includes(req.user._id)
+    const followRecord = await Follow.findOne({ follower: req.user._id, following: req.params.id })
+    const isFollowing = !!followRecord
     res.status(200).json({ message: 'user found', payload: user, isFollowing })
   } catch (err) { next(err) }
 })
@@ -99,25 +142,34 @@ userApp.post('/:id/follow', protect, async (req, res, next) => {
     if (targetId === currentId) {
       return res.status(400).json({ message: 'You cannot follow yourself' })
     }
-    const [targetUser, currentUser] = await Promise.all([
-      User.findById(targetId),
-      User.findById(currentId),
-    ])
+    const targetUser = await User.findById(targetId)
     if (!targetUser) return res.status(404).json({ message: 'User not found' })
 
-    const isFollowing = currentUser.following.includes(targetId)
-    if (isFollowing) {
-      currentUser.following.pull(targetId)
-      targetUser.followers.pull(currentId)
+    const existingFollow = await Follow.findOne({ follower: currentId, following: targetId })
+    let isFollowing = false
+
+    if (existingFollow) {
+      await Follow.findOneAndDelete({ _id: existingFollow._id })
+      isFollowing = false
     } else {
-      currentUser.following.push(targetId)
-      targetUser.followers.push(currentId)
+      await Follow.create({ follower: currentId, following: targetId })
+      isFollowing = true
+
+      // Create notification
+      await Notification.create({
+        recipient: targetId,
+        sender:    currentId,
+        type:      'follow'
+      })
     }
-    await Promise.all([currentUser.save(), targetUser.save()])
+
+    // Refetch target user to get updated counts
+    const updatedTarget = await User.findById(targetId)
+
     res.status(200).json({
       message:        'follow toggled',
-      following:      !isFollowing,
-      followersCount: targetUser.followers.length,
+      following:      isFollowing,
+      followersCount: updatedTarget.followersCount,
     })
   } catch (err) { next(err) }
 })
@@ -125,19 +177,47 @@ userApp.post('/:id/follow', protect, async (req, res, next) => {
 // get following list (protected)
 userApp.get('/:id/following', protect, async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id)
-      .populate('following', 'username profilePicture bio followers')
-    if (!user) return res.status(404).json({ message: 'User not found' })
-    res.status(200).json({ message: 'following list', payload: user.following })
+    const follows = await Follow.find({ follower: req.params.id })
+      .populate('following', 'username profilePicture bio followersCount followingCount')
+    const followingList = follows.map(f => f.following).filter(Boolean)
+    
+    // Check which of these the logged in user is following
+    const followingIds = followingList.map(u => u._id)
+    const activeFollows = await Follow.find({ follower: req.user._id, following: { $in: followingIds } })
+    const followedIds = new Set(activeFollows.map(f => f.following.toString()))
+
+    const payload = followingList.map(u => {
+      const uObj = u.toObject ? u.toObject() : u
+      return {
+        ...uObj,
+        isFollowing: followedIds.has(uObj._id.toString())
+      }
+    })
+
+    res.status(200).json({ message: 'following list', payload })
   } catch (err) { next(err) }
 })
 
 // get followers list (protected)
 userApp.get('/:id/followers', protect, async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id)
-      .populate('followers', 'username profilePicture bio followers')
-    if (!user) return res.status(404).json({ message: 'User not found' })
-    res.status(200).json({ message: 'followers list', payload: user.followers })
+    const follows = await Follow.find({ following: req.params.id })
+      .populate('follower', 'username profilePicture bio followersCount followingCount')
+    const followersList = follows.map(f => f.follower).filter(Boolean)
+
+    // Check which of these the logged in user is following
+    const followerIds = followersList.map(u => u._id)
+    const activeFollows = await Follow.find({ follower: req.user._id, following: { $in: followerIds } })
+    const followedIds = new Set(activeFollows.map(f => f.following.toString()))
+
+    const payload = followersList.map(u => {
+      const uObj = u.toObject ? u.toObject() : u
+      return {
+        ...uObj,
+        isFollowing: followedIds.has(uObj._id.toString())
+      }
+    })
+
+    res.status(200).json({ message: 'followers list', payload })
   } catch (err) { next(err) }
 })

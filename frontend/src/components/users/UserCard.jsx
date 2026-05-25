@@ -9,7 +9,9 @@ import Avatar from '../common/Avatar'
 const UserCard = ({ userData, showFollow = true }) => {
   const { user } = useAuth()
   const [following, setFollowing] = useState(
-    userData.followers?.includes(user?._id) || false
+    userData.isFollowing !== undefined
+      ? userData.isFollowing
+      : (userData.followers?.includes(user?._id) || false)
   )
   const [loading, setLoading] = useState(false)
 
@@ -38,7 +40,7 @@ const UserCard = ({ userData, showFollow = true }) => {
           sizeClassName="w-10 h-10"
         />
         <div className="min-w-0">
-          <p className="font-semibold text-(--text) text-[14px] truncate">{userData.username}</p>
+          <p className="font-semibold text-[var(--text)] text-[14px] truncate">{userData.username}</p>
           {userData.bio && <p className={`${mutedText} truncate text-[13px] leading-snug mt-0.5`}>{userData.bio}</p>}
         </div>
       </Link>

@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { HiHome, HiSearch, HiArchive, HiCog, HiUser, HiLogout } from 'react-icons/hi'
+import { HiHome, HiSearch, HiArchive, HiCog, HiUser, HiLogout, HiBell } from 'react-icons/hi'
 import { sidebarClass, sidebarLink, sidebarLinkActive, mutedText } from '../../styles/common'
 import VerselyWordmark from '../common/VerselyWordmark'
 import logo from '../../assets/versely_logo.png'
@@ -8,6 +8,7 @@ import logo from '../../assets/versely_logo.png'
 const links = [
   { path: '/home', icon: HiHome, label: 'Home' },
   { path: '/search', icon: HiSearch, label: 'Explore' },
+  { path: '/notifications', icon: HiBell, label: 'Notifications' },
   { path: '/archives', icon: HiArchive, label: 'Archives' },
   { path: '/settings', icon: HiCog, label: 'Settings' },
 ]

@@ -1,12 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { HiHome, HiSearch, HiArchive, HiCog, HiUser } from 'react-icons/hi'
+import { HiHome, HiSearch, HiArchive, HiCog, HiUser, HiBell } from 'react-icons/hi'
 
 const links = [
   { path: '/home', icon: HiHome, label: 'Home' },
   { path: '/search', icon: HiSearch, label: 'Explore' },
+  { path: '/notifications', icon: HiBell, label: 'Notifications' },
   { path: '/archives', icon: HiArchive, label: 'Archives' },
-  { path: '/settings', icon: HiCog, label: 'Settings' },
 ]
 
 const MobileBottomNav = () => {

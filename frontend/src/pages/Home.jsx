@@ -1,30 +1,45 @@
-import { useState, useEffect, useCallback } from 'react'
-import { getFeed } from '../services/postService'
+import { useState, useEffect } from 'react'
+import { getForYouFeed, getFollowingFeed, getTrendingFeed, getExploreFeed } from '../services/postService'
 import CreatePost from '../components/posts/CreatePost'
 import PostCard from '../components/posts/PostCard'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import EmptyState from '../components/common/EmptyState'
-import { ghostBtn } from '../styles/common'
+import { ghostBtn, tabsContainer, tab, tabActive } from '../styles/common'
 
 const Home = () => {
+  const [activeTab, setActiveTab] = useState('for-you')
   const [posts, setPosts] = useState([])
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(false)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
 
-  const fetchFeed = useCallback(async (pageNum = 0, append = false) => {
+  const fetchFeed = async (pageNum = 0, append = false) => {
     try {
-      const { data } = await getFeed(pageNum)
+      const getFeedFn = {
+        'for-you': getForYouFeed,
+        'following': getFollowingFeed,
+        'trending': getTrendingFeed,
+        'explore': getExploreFeed,
+      }[activeTab] || getForYouFeed
+
+      const { data } = await getFeedFn(pageNum)
       setPosts((prev) => append ? [...prev, ...data.payload] : data.payload)
       setHasMore(data.hasMore)
-    } catch { /* handled globally */ } finally {
+    } catch {
+      // Handled globally
+    } finally {
       setLoading(false)
       setLoadingMore(false)
     }
-  }, [])
+  }
 
-  useEffect(() => { fetchFeed() }, [fetchFeed])
+  // Refetch when tab changes
+  useEffect(() => {
+    setLoading(true)
+    setPage(0)
+    fetchFeed(0, false)
+  }, [activeTab])
 
   const loadMore = () => {
     setLoadingMore(true)
@@ -34,18 +49,40 @@ const Home = () => {
   }
 
   const handlePostCreated = (newPost) => {
-    setPosts([newPost, ...posts])
+    if (activeTab === 'for-you' || activeTab === 'following') {
+      setPosts([newPost, ...posts])
+    }
   }
 
   const handlePostDeleted = (postId) => {
     setPosts(posts.filter((p) => p._id !== postId))
   }
 
+  const tabList = [
+    { id: 'for-you', label: 'For You' },
+    { id: 'following', label: 'Following' },
+    { id: 'trending', label: 'Trending' },
+    { id: 'explore', label: 'Explore' },
+  ]
+
   return (
     <div>
       {/* Composer with editorial breathing room */}
-      <div className="mb-8">
+      <div className="mb-6">
         <CreatePost onPostCreated={handlePostCreated} />
+      </div>
+
+      {/* Navigation tabs */}
+      <div className={tabsContainer}>
+        {tabList.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setActiveTab(t.id)}
+            className={activeTab === t.id ? tabActive : tab}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {/* Feed */}
@@ -76,3 +113,4 @@ const Home = () => {
 }
 
 export default Home
+

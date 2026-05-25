@@ -160,6 +160,6 @@ export const badge =
 export const topicPill =
   "text-[12px] font-medium px-3 py-1.5 rounded-lg bg-[var(--surface-2)] text-[var(--muted)] border border-[var(--border)] hover:text-[var(--text)] hover:border-[var(--border-strong)] transition-all duration-200 cursor-pointer"
 export const overlay =
-  "fixed inset-0 bg-[var(--bg)]/60 backdrop-blur-sm z-40"
+  "fixed inset-0 bg-neutral-950/40 dark:bg-black/60 backdrop-blur-sm z-40"
 export const modal =
   "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 z-50 w-full max-w-sm shadow-lg"

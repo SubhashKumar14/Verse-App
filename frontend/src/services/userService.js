@@ -12,3 +12,4 @@ export const updateProfile = (id, data) => api.put(
 export const toggleFollow  = (id)       => api.post(`/users/${id}/follow`)
 export const getFollowing  = (id)       => api.get(`/users/${id}/following`)
 export const getFollowers  = (id)       => api.get(`/users/${id}/followers`)
+export const saveOnboardingInterests = (interests) => api.post('/users/onboarding-interests', { interests })

@@ -28,7 +28,7 @@ const Register = () => {
     try {
       await registerAccount(values)
       toast.success('Account created!')
-      navigate('/')
+      navigate('/onboarding')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed')
     }

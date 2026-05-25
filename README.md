@@ -90,7 +90,7 @@ This balances total engagement against post age to maintain fresh, active discus
 ### 2. Personalized "For You" Algorithm
 The personalization engine evaluates and ranks posts based on user interest profiles and network associations:
 
-$$\text{Personalized Score} = \frac{\text{network\_boost} + \text{interest\_boost} + \text{engagement\_score} + 1}{(\text{hoursElapsed} + 1.5)^{1.0}}$$
+$$\text{Personalized Score} = \frac{\text{network boost} + \text{interest boost} + \text{engagement score} + 1}{(\text{hoursElapsed} + 1.5)^{1.0}}$$
 
 * **Network Boost**: Adds **+50** points if the post's author is followed by the current user.
 * **Interest Boost**: Adds up to **+50** points based on the current user's profile interests match: `interestScore` (0.0 to 1.0) multiplied by 50.

@@ -5,8 +5,8 @@ Verse is a modern full-stack social media ecosystem inspired by Twitter/X, Insta
 ---
 
 ## 🚀 Live Demo
-* **Frontend Application**: [https://your-frontend-url](https://your-frontend-url)
-* **Backend API Gateway**: [https://your-backend-url](https://your-backend-url)
+* **Frontend Application**: [https://your-frontend-url](https://verse-app-beta.vercel.app)
+
 
 ---
 

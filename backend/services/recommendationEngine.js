@@ -122,7 +122,7 @@ export function calculateTrendScore(post, trendingHashtags) {
  * @returns {number} 0–1
  */
 export function calculateAuthorAffinityScore(authorId, authorAffinityMap) {
-  if (!authorAffinityMap) return 0
+  if (!authorId || !authorAffinityMap) return 0
   const count = authorAffinityMap[authorId.toString()] || 0
   return Math.min(count / 20, 1)
 }

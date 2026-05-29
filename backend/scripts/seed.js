@@ -413,20 +413,57 @@ async function seed() {
     await mongoose.connect(mongoUri)
     console.log(`Database connected successfully (${modeText}): ${mongoose.connection.host}`)
 
-    // Clear existing data
-    console.log('Clearing existing collections...')
+    // Clear existing data (preserving real users whose email does not end in @example.com)
+    console.log('Clearing existing seeded collections (preserving real users)...')
+    
+    // Find all seeded users (emails ending with @example.com)
+    const seededUsers = await User.find({ email: { $regex: /@example\.com$/i } }, '_id')
+    const seededUserIds = seededUsers.map(u => u._id)
+
+    // Delete seeded users
+    await User.deleteMany({ _id: { $in: seededUserIds } })
+
+    // Delete posts made by seeded users
+    await Post.deleteMany({ author: { $in: seededUserIds } })
+
+    // Delete comments, likes, bookmarks, reposts, follows, notifications, and hashtag interactions created by seeded users
     await Promise.all([
-      User.deleteMany({}),
-      Post.deleteMany({}),
-      Comment.deleteMany({}),
-      Follow.deleteMany({}),
-      Like.deleteMany({}),
-      Bookmark.deleteMany({}),
-      Notification.deleteMany({}),
-      Repost.deleteMany({}),
-      UserHashtagInteraction.deleteMany({})
+      Comment.deleteMany({ user: { $in: seededUserIds } }),
+      Like.deleteMany({ user: { $in: seededUserIds } }),
+      Bookmark.deleteMany({ user: { $in: seededUserIds } }),
+      Repost.deleteMany({ user: { $in: seededUserIds } }),
+      UserHashtagInteraction.deleteMany({ user: { $in: seededUserIds } }),
+      Follow.deleteMany({ $or: [{ follower: { $in: seededUserIds } }, { following: { $in: seededUserIds } }] }),
+      Notification.deleteMany({ $or: [{ recipient: { $in: seededUserIds } }, { sender: { $in: seededUserIds } }] })
     ])
-    console.log('Collections cleared.')
+
+    // Clean up orphaned records referencing deleted posts
+    const remainingPosts = await Post.find({}, '_id')
+    const remainingPostIds = remainingPosts.map(p => p._id)
+
+    await Promise.all([
+      Comment.deleteMany({ post: { $nin: remainingPostIds } }),
+      Like.deleteMany({ post: { $nin: remainingPostIds } }),
+      Bookmark.deleteMany({ post: { $nin: remainingPostIds } }),
+      Repost.deleteMany({ post: { $nin: remainingPostIds } }),
+      Notification.deleteMany({ post: { $nin: remainingPostIds } })
+    ])
+
+    // Recalculate followers/following/posts counts for remaining (real) users
+    const realUsers = await User.find({ email: { $not: /@example\.com$/i } })
+    for (const user of realUsers) {
+      const [followersCount, followingCount, postsCount] = await Promise.all([
+        Follow.countDocuments({ following: user._id }),
+        Follow.countDocuments({ follower: user._id }),
+        Post.countDocuments({ author: user._id, isDeleted: false })
+      ])
+      user.followersCount = followersCount
+      user.followingCount = followingCount
+      user.postsCount = postsCount
+      await user.save()
+    }
+    
+    console.log('Seed collections cleaned (real users preserved).')
 
     // 1. Generate Users
     console.log('Generating 1,500 users...')

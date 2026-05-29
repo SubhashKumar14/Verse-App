@@ -197,8 +197,10 @@ export async function getAuthorAffinityMap(userId) {
 
   const affinityMap = {}
   for (const post of posts) {
-    const authorId = post.author.toString()
-    affinityMap[authorId] = (affinityMap[authorId] || 0) + 1
+    if (post && post.author) {
+      const authorId = post.author.toString()
+      affinityMap[authorId] = (affinityMap[authorId] || 0) + 1
+    }
   }
 
   return affinityMap

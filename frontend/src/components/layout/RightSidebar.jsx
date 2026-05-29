@@ -43,11 +43,14 @@ const RightSidebar = () => {
           <div className="py-2"><LoadingSpinner size="sm" /></div>
         ) : trending.length > 0 ? (
           <div className="flex flex-wrap gap-2 px-1">
-            {trending.map((topic) => (
-              <span key={topic} className={topicPill}>
-                {topic}
-              </span>
-            ))}
+            {trending.map((topic) => {
+              const tag = typeof topic === 'string' ? topic : topic.hashtag
+              return (
+                <span key={tag} className={topicPill}>
+                  {tag}
+                </span>
+              )
+            })}
           </div>
         ) : (
           <p className={`${mutedText} text-xs py-2 px-1`}>No trending tags today.</p>

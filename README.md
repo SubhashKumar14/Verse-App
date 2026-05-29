@@ -1,3 +1,10 @@
+<!--
+README.md
+
+High-level overview of the Verse/VerseLy app: what it is, key features,
+architecture diagram, and links/screenshots for demos.
+-->
+
 # 🌌 Verse — AI-Powered Social Media Discovery Platform
 
 Verse is a modern full-stack social media ecosystem inspired by Twitter/X, Instagram Explore, Threads, and TikTok recommendation graphs. Built on the MERN stack, it features a scalable MongoDB architecture, personalized content feeds, an interactive interest-based onboarding system, and realistic social graph simulation.

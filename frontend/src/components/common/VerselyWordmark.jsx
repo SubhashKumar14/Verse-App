@@ -1,6 +1,10 @@
-// VerseLy Wordmark — Refined brand text
-// Uses the heading font with tight tracking for a premium editorial feel.
-// The "Ly" can optionally be accented for subtle brand differentiation.
+/**
+ * frontend/src/components/common/VerselyWordmark.jsx
+ *
+ * Brand wordmark component.
+ * Uses the heading font with tight tracking for an editorial feel.
+ * The "Ly" suffix can optionally be accented for subtle brand differentiation.
+ */
 
 const VerselyWordmark = ({ size = 'md', className = '', accentSuffix = true }) => {
   const sizes = {

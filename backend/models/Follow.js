@@ -1,3 +1,11 @@
+/**
+ * backend/models/Follow.js
+ *
+ * Mongoose Follow model.
+ * Represents a directional relationship: follower -> following.
+ * Enforces uniqueness (only follow once) and updates follower/following counts
+ * via post-save / post-delete hooks.
+ */
 import mongoose from 'mongoose'
 
 const followSchema = new mongoose.Schema(

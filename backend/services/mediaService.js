@@ -1,3 +1,10 @@
+/**
+ * backend/services/mediaService.js
+ *
+ * Cloudinary helpers used by API routes.
+ * Uploads images from an in-memory Multer buffer and deletes by public_id.
+ * Throws a 500-style error if Cloudinary credentials are missing.
+ */
 import { Readable } from 'stream'
 import { cloudinary } from '../config/cloudinary.js'
 

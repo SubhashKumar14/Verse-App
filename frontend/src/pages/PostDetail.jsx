@@ -1,3 +1,9 @@
+/**
+ * frontend/src/pages/PostDetail.jsx
+ *
+ * Post detail page.
+ * Loads a single post by id and renders the full post plus its comment thread.
+ */
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getPost } from '../services/postService'

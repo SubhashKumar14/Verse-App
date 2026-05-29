@@ -1,6 +1,25 @@
+/**
+ * backend/api/postsApi.js
+ *
+ * Express router for post-centric features:
+ * - Feeds (for-you / following / trending)
+ * - Search (kept FIRST to avoid collisions with `/:id` routes)
+ * - Post CRUD + soft-delete/restore
+ * - Engagement toggles (likes, bookmarks)
+ * - Comment counts + notification side-effects
+ * - Optional image upload/delete via Cloudinary
+ *
+ * Mounted at `/api/posts` in backend/server.js.
+ */
 import express from 'express'
 import { protect } from '../middleware/authMiddleware.js'
 import upload from '../middleware/uploadMiddleware.js'
+import {
+  validateCreatePostBody,
+  validateObjectIdParam,
+  validatePaginationQuery,
+  validateSearchQuery,
+} from '../middleware/validationMiddleware.js'
 import { Post } from '../models/Post.js'
 import { User } from '../models/User.js'
 import { Comment } from '../models/Comment.js'
@@ -13,7 +32,7 @@ import { deleteCloudinaryImage, uploadImage } from '../services/mediaService.js'
 export const postApp = express.Router()
 
 // ─── 1. SEARCH ENDPOINT (MUST BE FIRST TO AVOID ROUTE COLLISION) ─────────────
-postApp.get('/search', protect, async (req, res, next) => {
+postApp.get('/search', protect, validateSearchQuery({ paramName: 'q', maxLength: 100 }), async (req, res, next) => {
   try {
     const { q, type } = req.query
     if (!q || q.trim() === '') {
@@ -58,7 +77,7 @@ postApp.get('/search', protect, async (req, res, next) => {
 // ─── 2. FEED ENDPOINTS ───────────────────────────────────────────────────────
 
 // GET For You Feed (Personalized Recommendation Engine)
-postApp.get('/for-you', protect, async (req, res, next) => {
+postApp.get('/for-you', protect, validatePaginationQuery({ maxLimit: 50 }), async (req, res, next) => {
   try {
     const page  = parseInt(req.query.page)  || 0
     const limit = parseInt(req.query.limit) || 10
@@ -151,7 +170,7 @@ postApp.get('/for-you', protect, async (req, res, next) => {
 })
 
 // GET Following Feed (Chronological Network Feed)
-postApp.get('/following', protect, async (req, res, next) => {
+postApp.get('/following', protect, validatePaginationQuery({ maxLimit: 50 }), async (req, res, next) => {
   try {
     const page  = parseInt(req.query.page)  || 0
     const limit = parseInt(req.query.limit) || 10
@@ -197,7 +216,7 @@ postApp.get('/following', protect, async (req, res, next) => {
 })
 
 // GET Trending Feed (Time-Decayed Popularity ranking)
-postApp.get('/trending', protect, async (req, res, next) => {
+postApp.get('/trending', protect, validatePaginationQuery({ maxLimit: 50 }), async (req, res, next) => {
   try {
     const page  = parseInt(req.query.page)  || 0
     const limit = parseInt(req.query.limit) || 10
@@ -271,7 +290,7 @@ postApp.get('/trending', protect, async (req, res, next) => {
 })
 
 // GET Explore Feed (Discovery Engine)
-postApp.get('/explore', protect, async (req, res, next) => {
+postApp.get('/explore', protect, validatePaginationQuery({ maxLimit: 50 }), async (req, res, next) => {
   try {
     const page  = parseInt(req.query.page)  || 0
     const limit = parseInt(req.query.limit) || 10
@@ -391,7 +410,7 @@ postApp.get('/recommended-users', protect, async (req, res, next) => {
 // ─── 3. BASIC CRUDS & POST MANAGEMENT ────────────────────────────────────────
 
 // Get posts by a user
-postApp.get('/user/:id', protect, async (req, res, next) => {
+postApp.get('/user/:id', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const posts = await Post.find({ author: req.params.id, isDeleted: false })
       .sort({ createdAt: -1 })
@@ -417,7 +436,7 @@ postApp.get('/user/:id', protect, async (req, res, next) => {
 })
 
 // Get single post
-postApp.get('/:id', protect, async (req, res, next) => {
+postApp.get('/:id', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const post = await Post.findOne({ _id: req.params.id, isDeleted: false })
       .populate('author', 'username profilePicture')
@@ -438,7 +457,7 @@ postApp.get('/:id', protect, async (req, res, next) => {
 })
 
 // Create post (protected + optional image upload)
-postApp.post('/', protect, upload.single('image'), async (req, res, next) => {
+postApp.post('/', protect, upload.single('image'), validateCreatePostBody, async (req, res, next) => {
   let uploadedImage = null
 
   try {
@@ -495,7 +514,7 @@ postApp.post('/', protect, upload.single('image'), async (req, res, next) => {
 })
 
 // Soft delete post
-postApp.patch('/:id', protect, async (req, res, next) => {
+postApp.patch('/:id', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.id)
     if (!post || post.isDeleted) return res.status(404).json({ message: 'Post not found' })
@@ -511,7 +530,7 @@ postApp.patch('/:id', protect, async (req, res, next) => {
 })
 
 // Like / Unlike Toggle
-postApp.post('/:id/like', protect, async (req, res, next) => {
+postApp.post('/:id/like', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const postId = req.params.id
     const userId = req.user._id
@@ -549,7 +568,7 @@ postApp.post('/:id/like', protect, async (req, res, next) => {
 })
 
 // Bookmark / Unbookmark Toggle
-postApp.post('/:id/bookmark', protect, async (req, res, next) => {
+postApp.post('/:id/bookmark', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const postId = req.params.id
     const userId = req.user._id
@@ -587,7 +606,7 @@ postApp.get('/archives/user', protect, async (req, res, next) => {
 })
 
 // Restore archived post
-postApp.patch('/:id/restore', protect, async (req, res, next) => {
+postApp.patch('/:id/restore', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.id)
     if (!post || !post.isDeleted) return res.status(404).json({ message: 'Archived post not found' })

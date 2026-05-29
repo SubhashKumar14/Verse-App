@@ -1,3 +1,9 @@
+/**
+ * frontend/src/services/commentService.js
+ *
+ * Comment-related API calls for post threads.
+ * Supports create, soft-delete, and archive restore flows.
+ */
 import api from './api'
 
 export const getComments        = (postId) => api.get(`/comments/${postId}`)

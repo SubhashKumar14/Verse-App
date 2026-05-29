@@ -1,3 +1,13 @@
+/**
+ * backend/services/authService.js
+ *
+ * Auth “business logic” used by the common auth router.
+ * Keeps route handlers thin by centralizing:
+ * - user registration validation + creation
+ * - login credential checks
+ * - JWT creation
+ * - loading the authenticated user
+ */
 import jwt from 'jsonwebtoken'
 import { User } from '../models/User.js'
 

@@ -1,3 +1,10 @@
+/**
+ * frontend/src/components/posts/PostCard.jsx
+ *
+ * Feed item renderer for a single post.
+ * Handles optimistic like toggling, archive (soft delete) for the owner,
+ * and links to the post detail page.
+ */
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'

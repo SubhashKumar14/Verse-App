@@ -1,3 +1,10 @@
+/**
+ * frontend/src/components/layout/MainLayout.jsx
+ *
+ * Main authenticated layout wrapper.
+ * Provides the responsive 3-column shell (sidebar / outlet / right sidebar)
+ * plus mobile navigation and the floating action button.
+ */
 import { Outlet } from 'react-router-dom'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'

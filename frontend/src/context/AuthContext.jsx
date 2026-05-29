@@ -1,3 +1,11 @@
+/**
+ * frontend/src/context/AuthContext.jsx
+ *
+ * Authentication state container for the React app.
+ * - Bootstraps the session by calling `/api/common/user`
+ * - Exposes login/register/logout helpers
+ * - Stores `user` + `loading` state and makes it available via `useAuth()`
+ */
 import { createContext, useContext, useState, useEffect } from 'react'
 import * as authService from '../services/authService'
 

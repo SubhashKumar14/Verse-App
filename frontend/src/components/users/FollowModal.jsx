@@ -1,9 +1,15 @@
+/**
+ * frontend/src/components/users/FollowModal.jsx
+ *
+ * Modal that lists a user's followers or following.
+ * Fetches data on open and reuses <UserCard /> for each row.
+ */
 import { useEffect, useState } from 'react'
 import { getFollowers, getFollowing } from '../../services/userService'
 import UserCard from './UserCard'
 import LoadingSpinner from '../common/LoadingSpinner'
 import EmptyState from '../common/EmptyState'
-import { overlay, modal } from '../../styles/common'
+import { overlay } from '../../styles/common'
 import { HiX } from 'react-icons/hi'
 
 const FollowModal = ({ userId, type, onClose }) => {

@@ -1,3 +1,9 @@
+/**
+ * frontend/src/pages/Landing.jsx
+ *
+ * Public landing/marketing page.
+ * Introduces the product and routes users to login/register.
+ */
 import { Link } from 'react-router-dom'
 import { pageBackground, primaryBtn, ghostBtn, bodyText, mutedText, badge } from '../styles/common'
 import VerselyWordmark from '../components/common/VerselyWordmark'

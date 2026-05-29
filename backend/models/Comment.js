@@ -1,3 +1,10 @@
+/**
+ * backend/models/Comment.js
+ *
+ * Mongoose Comment model.
+ * Represents a comment authored by a user on a post.
+ * Uses soft-delete (archive) so comments can be restored later.
+ */
 import mongoose from 'mongoose'
 
 const commentSchema = new mongoose.Schema(

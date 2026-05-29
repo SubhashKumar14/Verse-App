@@ -1,10 +1,17 @@
+/**
+ * frontend/src/pages/Onboarding.jsx
+ *
+ * First-run onboarding step.
+ * Lets the user pick interest categories and saves them to build a personalized
+ * feed and recommendations.
+ */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { saveOnboardingInterests } from '../services/userService'
 import {
-  pageBackground, formCard, formTitle, submitBtn, mutedText,
-  headingClass, pageSubtitle
+  pageBackground, submitBtn, mutedText,
+  headingClass
 } from '../styles/common'
 import toast from 'react-hot-toast'
 import logo from '../assets/versely_logo.png'

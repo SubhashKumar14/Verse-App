@@ -1,3 +1,9 @@
+/**
+ * frontend/src/components/layout/MobileBottomNav.jsx
+ *
+ * Bottom navigation bar for mobile.
+ * Hidden on desktop and hidden when the user is not authenticated.
+ */
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { HiHome, HiSearch, HiArchive, HiCog, HiUser, HiBell } from 'react-icons/hi'

@@ -1,6 +1,18 @@
+/**
+ * backend/api/commonApi.js
+ *
+ * “Common” API routes shared across auth/session concerns.
+ * Handles register/login/logout and a protected “current user” endpoint.
+ *
+ * Important detail: this router sets the JWT in an httpOnly cookie with
+ * environment-sensitive `secure`/`sameSite` settings.
+ *
+ * Mounted at `/api/common` in backend/server.js.
+ */
 import express from 'express'
 import jwt from 'jsonwebtoken'
 import { protect } from '../middleware/authMiddleware.js'
+import { validateLoginBody, validateRegisterBody } from '../middleware/validationMiddleware.js'
 import { registerUser, loginUser, getAuthUser } from '../services/authService.js'
 
 export const commonApp = express.Router()
@@ -24,7 +36,7 @@ const getCookieOptions = (token) => {
 }
 
 // register
-commonApp.post('/register', async (req, res, next) => {
+commonApp.post('/register', validateRegisterBody, async (req, res, next) => {
   try {
     const { user, token } = await registerUser(req.body)
     res.cookie('token', token, getCookieOptions(token))
@@ -33,7 +45,7 @@ commonApp.post('/register', async (req, res, next) => {
 })
 
 // login
-commonApp.post('/login', async (req, res, next) => {
+commonApp.post('/login', validateLoginBody, async (req, res, next) => {
   try {
     const { user, token } = await loginUser(req.body)
     res.cookie('token', token, getCookieOptions(token))

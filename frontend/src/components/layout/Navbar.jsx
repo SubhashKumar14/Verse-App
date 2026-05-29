@@ -1,3 +1,9 @@
+/**
+ * frontend/src/components/layout/Navbar.jsx
+ *
+ * Mobile-only top navigation bar.
+ * Shows the brand + current user's avatar and a logout action.
+ */
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { HiLogout } from 'react-icons/hi'

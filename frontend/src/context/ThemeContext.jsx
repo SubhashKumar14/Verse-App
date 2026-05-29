@@ -1,3 +1,10 @@
+/**
+ * frontend/src/context/ThemeContext.jsx
+ *
+ * Theme preference manager (light/dark/system).
+ * Persists preference in localStorage and applies the resolved theme by
+ * setting `data-theme` and `color-scheme` on the document root.
+ */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 
 const ThemeContext = createContext()
@@ -53,6 +60,7 @@ export const ThemeProvider = ({ children }) => {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => {
   const ctx = useContext(ThemeContext)
   if (!ctx) throw new Error('useTheme must be used within ThemeProvider')

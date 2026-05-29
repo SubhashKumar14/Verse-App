@@ -1,3 +1,11 @@
+# backend/req.http
+#
+# REST Client scratchpad for manually exercising the backend API.
+# Useful for quick smoke tests during development.
+#
+# Tip: the Authorization Bearer tokens in this file are just examples —
+# replace them after logging in, or rely on the auth cookie instead.
+
 ###register user
 POST http://localhost:5000/api/common/register
 Content-Type: application/json

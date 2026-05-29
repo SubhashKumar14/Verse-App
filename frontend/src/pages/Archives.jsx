@@ -1,3 +1,10 @@
+/**
+ * frontend/src/pages/Archives.jsx
+ *
+ * Archives page.
+ * Shows the user's soft-deleted (archived) posts and comments and allows
+ * restoring them back into the active feed.
+ */
 import { useState, useEffect } from 'react'
 import { getArchivedPosts, restorePost } from '../services/postService'
 import { getArchivedComments, restoreComment } from '../services/commentService'

@@ -1,3 +1,9 @@
+/**
+ * frontend/src/services/postService.js
+ *
+ * Post-related API calls:
+ * feeds, post details, create/delete/restore, and engagement toggles.
+ */
 import api from './api'
 
 export const getFeed        = (page = 0)  => api.get(`/posts?page=${page}`)

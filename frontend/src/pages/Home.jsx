@@ -1,3 +1,10 @@
+/**
+ * frontend/src/pages/Home.jsx
+ *
+ * Home/feed page.
+ * Renders the composer and feed tabs (for-you, following, trending, explore)
+ * with simple pagination.
+ */
 import { useState, useEffect } from 'react'
 import { getForYouFeed, getFollowingFeed, getTrendingFeed, getExploreFeed } from '../services/postService'
 import CreatePost from '../components/posts/CreatePost'

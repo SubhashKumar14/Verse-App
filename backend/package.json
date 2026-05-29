@@ -1,4 +1,6 @@
 {
+	"name": "verse-app-backend",
+	"description": "Backend API (Express + MongoDB) for Verse-App.",
 	"type": "module",
 	"dependencies": {
 		"bcryptjs": "^3.0.3",

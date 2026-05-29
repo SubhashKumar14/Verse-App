@@ -1,3 +1,10 @@
+/**
+ * backend/scratch/test_follow_api.js
+ *
+ * Scratch/debug script used to validate the follow/follower query logic.
+ * Connects to MongoDB, picks a sample user, reproduces the follower list shape
+ * the API returns (including `isFollowing`), and logs a sample payload.
+ */
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import path from 'path'

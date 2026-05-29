@@ -1,3 +1,10 @@
+/**
+ * frontend/src/pages/Profile.jsx
+ *
+ * User profile page.
+ * Fetches a user's profile + posts, supports follow/unfollow, and opens
+ * a modal listing followers/following.
+ */
 import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'

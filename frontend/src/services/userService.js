@@ -1,3 +1,10 @@
+/**
+ * frontend/src/services/userService.js
+ *
+ * User/profile-related API calls:
+ * fetch profile, search, update profile, follow/unfollow, followers/following,
+ * and onboarding interest submission.
+ */
 import api from './api'
 
 export const getUser       = (id)       => api.get(`/users/${id}`)

@@ -1,3 +1,10 @@
+/**
+ * frontend/src/components/layout/RightSidebar.jsx
+ *
+ * Desktop right sidebar.
+ * Fetches and displays non-critical “discover” content like trending tags and
+ * recommended writers.
+ */
 import { useState, useEffect } from 'react'
 import { getTrendingTags, getRecommendedUsers } from '../../services/postService'
 import UserCard from '../users/UserCard'

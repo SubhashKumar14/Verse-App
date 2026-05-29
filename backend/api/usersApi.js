@@ -1,6 +1,24 @@
+/**
+ * backend/api/usersApi.js
+ *
+ * Express router for user/profile flows:
+ * - User search (must be before `/:id`)
+ * - Onboarding: storing interest scores
+ * - Profile read + update (including optional avatar upload)
+ * - Follow/unfollow toggles and follower/following lists
+ * - Emits follow notifications
+ *
+ * Mounted at `/api/users` in backend/server.js.
+ */
 import express from 'express'
 import { protect } from '../middleware/authMiddleware.js'
 import upload from '../middleware/uploadMiddleware.js'
+import {
+  validateObjectIdParam,
+  validateOnboardingInterestsBody,
+  validateProfileUpdateBody,
+  validateSearchQuery,
+} from '../middleware/validationMiddleware.js'
 import { User } from '../models/User.js'
 import { Follow } from '../models/Follow.js'
 import { Notification } from '../models/Notification.js'
@@ -9,7 +27,7 @@ import { deleteCloudinaryImage, uploadImage } from '../services/mediaService.js'
 export const userApp = express.Router()
 
 // search users — must be before /:id to avoid route collision
-userApp.get('/search', protect, async (req, res, next) => {
+userApp.get('/search', protect, validateSearchQuery({ paramName: 'q', maxLength: 100 }), async (req, res, next) => {
   try {
     const query = req.query.q
     let users = []
@@ -18,11 +36,15 @@ userApp.get('/search', protect, async (req, res, next) => {
       // If no query, return some users as recommendations
       users = await User.find({ _id: { $ne: req.user._id } }).limit(5)
     } else {
+      // Escape user input so it behaves like a literal search string (and
+      // avoids regex injection/perf issues).
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
       // case-insensitive search on username or email, exclude current user
       users = await User.find({
         $or: [
-          { username: { $regex: query, $options: 'i' } },
-          { email:    { $regex: query, $options: 'i' } },
+          { username: { $regex: escapedQuery, $options: 'i' } },
+          { email:    { $regex: escapedQuery, $options: 'i' } },
         ],
         _id: { $ne: req.user._id },
       }).limit(20)
@@ -46,12 +68,9 @@ userApp.get('/search', protect, async (req, res, next) => {
 })
 
 // onboarding interests (protected)
-userApp.post('/onboarding-interests', protect, async (req, res, next) => {
+userApp.post('/onboarding-interests', protect, validateOnboardingInterestsBody, async (req, res, next) => {
   try {
     const { interests } = req.body
-    if (!interests || !Array.isArray(interests)) {
-      return res.status(400).json({ message: 'Interests array is required' })
-    }
 
     const interestScores = {}
     interests.forEach(interest => {
@@ -72,7 +91,7 @@ userApp.post('/onboarding-interests', protect, async (req, res, next) => {
 })
 
 // get user by id (protected)
-userApp.get('/:id', protect, async (req, res, next) => {
+userApp.get('/:id', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id)
     if (!user) return res.status(404).json({ message: 'User not found' })
@@ -83,7 +102,13 @@ userApp.get('/:id', protect, async (req, res, next) => {
 })
 
 // update profile (protected — own profile only)
-userApp.put('/:id', protect, upload.single('profilePicture'), async (req, res, next) => {
+userApp.put(
+  '/:id',
+  protect,
+  validateObjectIdParam('id'),
+  upload.single('profilePicture'),
+  validateProfileUpdateBody,
+  async (req, res, next) => {
   let uploadedProfilePicture = null
 
   try {
@@ -135,7 +160,7 @@ userApp.put('/:id', protect, upload.single('profilePicture'), async (req, res, n
 })
 
 // follow / unfollow toggle (protected)
-userApp.post('/:id/follow', protect, async (req, res, next) => {
+userApp.post('/:id/follow', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const targetId    = req.params.id
     const currentId   = req.user._id.toString()
@@ -175,7 +200,7 @@ userApp.post('/:id/follow', protect, async (req, res, next) => {
 })
 
 // get following list (protected)
-userApp.get('/:id/following', protect, async (req, res, next) => {
+userApp.get('/:id/following', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const follows = await Follow.find({ follower: req.params.id })
       .populate('following', 'username profilePicture bio followersCount followingCount')
@@ -199,7 +224,7 @@ userApp.get('/:id/following', protect, async (req, res, next) => {
 })
 
 // get followers list (protected)
-userApp.get('/:id/followers', protect, async (req, res, next) => {
+userApp.get('/:id/followers', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const follows = await Follow.find({ following: req.params.id })
       .populate('follower', 'username profilePicture bio followersCount followingCount')

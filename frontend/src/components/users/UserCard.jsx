@@ -1,3 +1,9 @@
+/**
+ * frontend/src/components/users/UserCard.jsx
+ *
+ * Compact user preview card used in search results and recommendations.
+ * Optionally includes a follow/unfollow button (hidden for self).
+ */
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'

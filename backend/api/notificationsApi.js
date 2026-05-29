@@ -1,5 +1,16 @@
+/**
+ * backend/api/notificationsApi.js
+ *
+ * Express router for in-app notifications.
+ * - Fetch recent notifications for the signed-in user
+ * - Mark one notification as read
+ * - Mark all notifications as read
+ *
+ * Mounted at `/api/notifications` in backend/server.js.
+ */
 import express from 'express'
 import { protect } from '../middleware/authMiddleware.js'
+import { validateObjectIdParam } from '../middleware/validationMiddleware.js'
 import { Notification } from '../models/Notification.js'
 
 export const notificationsApp = express.Router()
@@ -39,7 +50,7 @@ notificationsApp.patch('/read-all', protect, async (req, res, next) => {
 })
 
 // PATCH /:id/read — Mark a specific notification as read
-notificationsApp.patch('/:id/read', protect, async (req, res, next) => {
+notificationsApp.patch('/:id/read', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const notification = await Notification.findOneAndUpdate(
       { _id: req.params.id, recipient: req.user._id },

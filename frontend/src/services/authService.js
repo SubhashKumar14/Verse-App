@@ -1,3 +1,9 @@
+/**
+ * frontend/src/services/authService.js
+ *
+ * Thin wrapper around auth/session endpoints.
+ * Uses the shared Axios instance so cookies + base URL are consistent.
+ */
 import api from './api'
 
 export const register = (data) => api.post('/common/register', data)

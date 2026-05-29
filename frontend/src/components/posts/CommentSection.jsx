@@ -1,3 +1,10 @@
+/**
+ * frontend/src/components/posts/CommentSection.jsx
+ *
+ * Comment thread UI for a post.
+ * Fetches comments, allows adding a new comment, and supports author-only
+ * soft delete.
+ */
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { getComments, addComment, softDeleteComment } from '../../services/commentService'

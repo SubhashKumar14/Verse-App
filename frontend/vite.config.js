@@ -1,3 +1,10 @@
+/**
+ * frontend/vite.config.js
+ *
+ * Vite configuration.
+ * Uses the React plugin + Tailwind Vite plugin and proxies `/api` (and `/uploads`)
+ * to the backend during local development to avoid browser CORS issues.
+ */
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'

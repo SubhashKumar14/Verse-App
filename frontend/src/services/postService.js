@@ -28,6 +28,7 @@ export const repostPost     = (id)        => api.post(`/posts/${id}/repost`)
 export const softDeletePost = (id)        => api.patch(`/posts/${id}`)
 export const getArchivedPosts = ()        => api.get('/posts/archives/user')
 export const restorePost    = (id)        => api.patch(`/posts/${id}/restore`)
+export const deletePost     = (id)        => api.delete(`/posts/${id}`)
 
 // ─── Search (returns { posts, hashtags, users }) ────────────────────────────
 export const searchAll = (q, type) => {

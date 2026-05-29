@@ -4,20 +4,42 @@
  * Bottom navigation bar for mobile.
  * Hidden on desktop and hidden when the user is not authenticated.
  */
+import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { HiHome, HiSearch, HiArchive, HiCog, HiUser, HiBell } from 'react-icons/hi'
+import { HiHome, HiSearch, HiArchive, HiCog, HiUser, HiBell, HiMail } from 'react-icons/hi'
+import { getUnreadCount } from '../../services/messageService'
 
 const links = [
   { path: '/home', icon: HiHome, label: 'Home' },
   { path: '/search', icon: HiSearch, label: 'Explore' },
   { path: '/notifications', icon: HiBell, label: 'Notifications' },
+  { path: '/messages', icon: HiMail, label: 'Messages' },
   { path: '/archives', icon: HiArchive, label: 'Archives' },
 ]
 
 const MobileBottomNav = () => {
   const location = useLocation()
   const { user } = useAuth()
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    if (!user) return
+
+    const fetchUnread = async () => {
+      try {
+        const { data } = await getUnreadCount()
+        setUnreadCount(data.count || 0)
+      } catch {
+        // fail silently
+      }
+    }
+
+    fetchUnread()
+    const interval = setInterval(fetchUnread, 8000)
+
+    return () => clearInterval(interval)
+  }, [user])
 
   if (!user) return null
 
@@ -27,6 +49,7 @@ const MobileBottomNav = () => {
         {links.map((item) => {
           const IconComponent = item.icon
           const isActive = location.pathname === item.path
+          const isMessages = item.path === '/messages'
           return (
             <Link
               key={item.path}
@@ -37,7 +60,11 @@ const MobileBottomNav = () => {
               }`}
             >
               <IconComponent className="text-[24px]" />
-              {isActive && (
+              {isMessages && unreadCount > 0 ? (
+                <span className="absolute top-2 right-1/2 translate-x-3 bg-[var(--accent)] text-[var(--accent-ink)] text-[9px] font-bold h-4 min-w-4 px-1 flex items-center justify-center rounded-full border-2 border-[var(--surface)]">
+                  {unreadCount}
+                </span>
+              ) : isActive && (
                 <span className="absolute bottom-2 w-1.5 h-1.5 rounded-full bg-[var(--accent)]"></span>
               )}
             </Link>

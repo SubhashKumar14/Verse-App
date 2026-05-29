@@ -22,6 +22,7 @@ import Archives from './pages/Archives'
 import Settings from './pages/Settings'
 import Onboarding from './pages/Onboarding'
 import Notifications from './pages/Notifications'
+import Messages from './pages/Messages'
 
 // Component to handle the root path based on auth state
 const RootRedirect = () => {
@@ -76,6 +77,8 @@ function App() {
               <Route path="/archives" element={<Archives />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/notifications" element={<Notifications />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/messages/:chatUserId" element={<Messages />} />
             </Route>
 
             {/* Fallback */}

@@ -4,10 +4,12 @@
  * Desktop left navigation rail.
  * Renders primary routes, the user's profile link, and logout.
  */
+import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { HiHome, HiSearch, HiArchive, HiCog, HiUser, HiLogout, HiBell } from 'react-icons/hi'
+import { HiHome, HiSearch, HiArchive, HiCog, HiUser, HiLogout, HiBell, HiMail } from 'react-icons/hi'
 import { sidebarClass, sidebarLink, sidebarLinkActive, mutedText } from '../../styles/common'
+import { getUnreadCount } from '../../services/messageService'
 import VerselyWordmark from '../common/VerselyWordmark'
 import logo from '../../assets/versely_logo.png'
 
@@ -15,6 +17,7 @@ const links = [
   { path: '/home', icon: HiHome, label: 'Home' },
   { path: '/search', icon: HiSearch, label: 'Explore' },
   { path: '/notifications', icon: HiBell, label: 'Notifications' },
+  { path: '/messages', icon: HiMail, label: 'Messages' },
   { path: '/archives', icon: HiArchive, label: 'Archives' },
   { path: '/settings', icon: HiCog, label: 'Settings' },
 ]
@@ -23,6 +26,25 @@ const Sidebar = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    if (!user) return
+
+    const fetchUnread = async () => {
+      try {
+        const { data } = await getUnreadCount()
+        setUnreadCount(data.count || 0)
+      } catch {
+        // fail silently
+      }
+    }
+
+    fetchUnread()
+    const interval = setInterval(fetchUnread, 8000)
+
+    return () => clearInterval(interval)
+  }, [user])
 
   const handleLogout = async () => {
     await logout()
@@ -41,6 +63,7 @@ const Sidebar = () => {
       <div className="space-y-1">
         {links.map((item) => {
           const IconComponent = item.icon
+          const isMessages = item.path === '/messages'
           return (
             <Link
               key={item.path}
@@ -48,7 +71,12 @@ const Sidebar = () => {
               className={location.pathname === item.path ? sidebarLinkActive : sidebarLink}
             >
               <IconComponent className="text-xl" />
-              <span>{item.label}</span>
+              <span className="flex-1">{item.label}</span>
+              {isMessages && unreadCount > 0 && (
+                <span className="bg-[var(--accent)] text-[var(--accent-ink)] text-[10px] font-bold h-4 min-w-4 px-1.5 flex items-center justify-center rounded-full">
+                  {unreadCount}
+                </span>
+              )}
             </Link>
           )
         })}

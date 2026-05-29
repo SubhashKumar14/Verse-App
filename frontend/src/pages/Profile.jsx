@@ -91,13 +91,18 @@ const Profile = () => {
                   Edit profile
                 </Link>
               ) : (
-                <button
-                  onClick={handleFollow}
-                  aria-pressed={isFollowing}
-                  className={`${followBtn} ${isFollowing ? followBtnUnfollow : followBtnFollow}`}
-                >
-                  {isFollowing ? 'Unfollow' : 'Follow'}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleFollow}
+                    aria-pressed={isFollowing}
+                    className={`${followBtn} ${isFollowing ? followBtnUnfollow : followBtnFollow}`}
+                  >
+                    {isFollowing ? 'Unfollow' : 'Follow'}
+                  </button>
+                  <Link to={`/messages/${profile._id}`} className={secondaryBtn}>
+                    Message
+                  </Link>
+                </div>
               )}
             </div>
             {profile.bio && <p className={profileBio}>{profile.bio}</p>}

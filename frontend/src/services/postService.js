@@ -2,7 +2,8 @@
  * frontend/src/services/postService.js
  *
  * Post-related API calls:
- * feeds, post details, create/delete/restore, and engagement toggles.
+ * feeds, post details, create/delete/restore, engagement toggles,
+ * search, trending, and reposts.
  */
 import api from './api'
 
@@ -23,8 +24,15 @@ export const createPost     = (data)      => api.post('/posts', data, {
   },
 })
 export const likePost       = (id)        => api.post(`/posts/${id}/like`)
+export const repostPost     = (id)        => api.post(`/posts/${id}/repost`)
 export const softDeletePost = (id)        => api.patch(`/posts/${id}`)
 export const getArchivedPosts = ()        => api.get('/posts/archives/user')
 export const restorePost    = (id)        => api.patch(`/posts/${id}/restore`)
 export const deletePost     = (id)        => api.delete(`/posts/${id}`)
 
+// ─── Search (returns { posts, hashtags, users }) ────────────────────────────
+export const searchAll = (q, type) => {
+  const params = new URLSearchParams({ q })
+  if (type) params.set('type', type)
+  return api.get(`/posts/search?${params.toString()}`)
+}

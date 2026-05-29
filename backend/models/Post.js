@@ -48,6 +48,11 @@ const postSchema = new mongoose.Schema(
       default: 0,
     },
 
+    repostsCount: {
+      type:    Number,
+      default: 0,
+    },
+
     category: {
       type:     String,
       required: [true, 'Post must belong to a category'],

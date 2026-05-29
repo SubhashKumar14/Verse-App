@@ -2,11 +2,11 @@
  * backend/api/postsApi.js
  *
  * Express router for post-centric features:
- * - Feeds (for-you / following / trending)
- * - Search (kept FIRST to avoid collisions with `/:id` routes)
+ * - Feeds (for-you / following / trending / explore) — powered by recommendation engine
+ * - Search (hashtag search returns posts first, then hashtags, then users)
  * - Post CRUD + soft-delete/restore
- * - Engagement toggles (likes, bookmarks)
- * - Comment counts + notification side-effects
+ * - Engagement toggles (likes, bookmarks, reposts)
+ * - Interest updates on every engagement action
  * - Optional image upload/delete via Cloudinary
  *
  * Mounted at `/api/posts` in backend/server.js.
@@ -26,150 +26,221 @@ import { Comment } from '../models/Comment.js'
 import { Follow } from '../models/Follow.js'
 import { Like } from '../models/Like.js'
 import { Bookmark } from '../models/Bookmark.js'
+import { Repost } from '../models/Repost.js'
 import { Notification } from '../models/Notification.js'
 import { deleteCloudinaryImage, uploadImage } from '../services/mediaService.js'
+import { updateInterestsOnEngagement, removeInterestOnDisengagement, getAuthorAffinityMap } from '../services/interestService.js'
+import { rankPostsForHome, rankPostsForExplore } from '../services/recommendationEngine.js'
+import { getTrendingHashtagSet, calculateTrendingHashtags, getTrendingCategories } from '../services/trendingService.js'
 
 export const postApp = express.Router()
+
+// ─── HELPER: Attach isLiked / isBookmarked / isReposted flags to posts ──────
+async function attachEngagementFlags(posts, userId) {
+  const postIds = posts.map(p => p._id)
+  const [userLikes, userBookmarks, userReposts] = await Promise.all([
+    Like.find({ user: userId, post: { $in: postIds } }),
+    Bookmark.find({ user: userId, post: { $in: postIds } }),
+    Repost.find({ user: userId, post: { $in: postIds } }),
+  ])
+  const likedSet = new Set(userLikes.map(l => l.post.toString()))
+  const bookmarkedSet = new Set(userBookmarks.map(b => b.post.toString()))
+  const repostedSet = new Set(userReposts.map(r => r.post.toString()))
+
+  return posts.map(post => {
+    const pObj = post.toObject ? post.toObject() : { ...post }
+    pObj.isLiked = likedSet.has(pObj._id.toString())
+    pObj.isBookmarked = bookmarkedSet.has(pObj._id.toString())
+    pObj.isReposted = repostedSet.has(pObj._id.toString())
+    return pObj
+  })
+}
 
 // ─── 1. SEARCH ENDPOINT (MUST BE FIRST TO AVOID ROUTE COLLISION) ─────────────
 postApp.get('/search', protect, validateSearchQuery({ paramName: 'q', maxLength: 100 }), async (req, res, next) => {
   try {
     const { q, type } = req.query
     if (!q || q.trim() === '') {
-      return res.status(200).json({ message: 'empty query', payload: [] })
+      return res.status(200).json({ message: 'empty query', payload: { posts: [], hashtags: [], users: [] } })
     }
 
     const searchTerm = q.trim()
+    const isHashtagSearch = searchTerm.startsWith('#')
 
+    // If explicit type=users, only search users
     if (type === 'users') {
       const users = await User.find({ $text: { $search: searchTerm } }).limit(20)
-      return res.status(200).json({ message: 'users found', payload: users })
-    } else {
-      // Search posts
-      const posts = await Post.find({
-        $text: { $search: searchTerm },
-        isDeleted: false
-      })
-      .sort({ score: { $meta: "textScore" } })
-      .limit(20)
-      .populate('author', 'username profilePicture')
-
-      const postIds = posts.map(p => p._id)
-      const [userLikes, userBookmarks] = await Promise.all([
-        Like.find({ user: req.user._id, post: { $in: postIds } }),
-        Bookmark.find({ user: req.user._id, post: { $in: postIds } })
-      ])
-      const likedSet = new Set(userLikes.map(l => l.post.toString()))
-      const bookmarkedSet = new Set(userBookmarks.map(b => b.post.toString()))
-
-      const payload = posts.map(post => {
-        const pObj = post.toObject()
-        pObj.isLiked = likedSet.has(post._id.toString())
-        pObj.isBookmarked = bookmarkedSet.has(post._id.toString())
-        return pObj
-      })
-
-      return res.status(200).json({ message: 'posts found', payload })
+      return res.status(200).json({ message: 'users found', payload: { posts: [], hashtags: [], users } })
     }
+
+    // ─── Posts search (prioritized) ───────────────────────────────────────
+    let posts = []
+    if (isHashtagSearch) {
+      // Exact hashtag search + fuzzy (strip # for regex)
+      const hashtagClean = searchTerm.replace(/^#/, '').toLowerCase()
+      const escapedHashtag = hashtagClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+      posts = await Post.find({
+        isDeleted: false,
+        hashtags: { $regex: escapedHashtag, $options: 'i' },
+      })
+        .sort({ likesCount: -1, createdAt: -1 })
+        .limit(30)
+        .populate('author', 'username profilePicture')
+    } else {
+      // Full-text search across content, hashtags, and category
+      posts = await Post.find({
+        $text: { $search: searchTerm },
+        isDeleted: false,
+      })
+        .sort({ score: { $meta: 'textScore' } })
+        .limit(30)
+        .populate('author', 'username profilePicture')
+    }
+
+    const postsWithFlags = await attachEngagementFlags(posts, req.user._id)
+
+    // ─── Trending hashtags matching the query ─────────────────────────────
+    const allTrending = await calculateTrendingHashtags(72, 30)
+    const queryLower = searchTerm.replace(/^#/, '').toLowerCase()
+    const matchingHashtags = allTrending.filter(t =>
+      t.hashtag.toLowerCase().replace(/^#/, '').includes(queryLower)
+    ).slice(0, 10)
+
+    // ─── Users matching the query (secondary) ─────────────────────────────
+    const escapedQuery = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const users = await User.find({
+      $or: [
+        { username: { $regex: escapedQuery, $options: 'i' } },
+        { bio: { $regex: escapedQuery, $options: 'i' } },
+      ],
+      _id: { $ne: req.user._id },
+    }).limit(10)
+
+    // Check follow status for returned users
+    const userIds = users.map(u => u._id)
+    const activeFollows = await Follow.find({ follower: req.user._id, following: { $in: userIds } })
+    const followedIds = new Set(activeFollows.map(f => f.following.toString()))
+    const usersWithFollow = users.map(u => {
+      const uObj = u.toObject ? u.toObject() : u
+      return { ...uObj, isFollowing: followedIds.has(uObj._id.toString()) }
+    })
+
+    return res.status(200).json({
+      message: 'search results',
+      payload: {
+        posts: postsWithFlags,
+        hashtags: matchingHashtags,
+        users: usersWithFollow,
+      },
+    })
   } catch (err) { next(err) }
 })
 
 // ─── 2. FEED ENDPOINTS ───────────────────────────────────────────────────────
 
-// GET For You Feed (Personalized Recommendation Engine)
+// ─── GET For You Feed (Recommendation Engine) ────────────────────────────────
 postApp.get('/for-you', protect, validatePaginationQuery({ maxLimit: 50 }), async (req, res, next) => {
   try {
     const page  = parseInt(req.query.page)  || 0
     const limit = parseInt(req.query.limit) || 10
 
-    // Fetch user preferences
+    // Step 1: Fetch user profile
     const currentUser = await User.findById(req.user._id)
-    const interestMap = currentUser?.interestScores ? Object.fromEntries(currentUser.interestScores) : {}
+    const interestMap = currentUser?.interestScores
+      ? Object.fromEntries(currentUser.interestScores)
+      : {}
 
-    // Find followed users
+    // Step 2: Fetch followed users
     const follows = await Follow.find({ follower: req.user._id })
     const followingIds = follows.map(f => f.following)
 
-    // Build dynamic interest weight case statements
-    const branches = Object.keys(interestMap).map(cat => ({
-      case: { $eq: ["$category", cat] },
-      then: interestMap[cat]
-    }))
+    // Step 3: Fetch trending hashtags & author affinity
+    const [trendingHashtags, authorAffinityMap] = await Promise.all([
+      getTrendingHashtagSet(72, 20),
+      getAuthorAffinityMap(req.user._id),
+    ])
 
-    const categoryScoreExpr = branches.length > 0
-      ? { $switch: { branches, default: 0.0 } }
-      : 0.0
+    // Step 4: Candidate generation (~200 posts)
+    // Pull from 3 sources: interest-matching, trending, and followed authors
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600000)
+    const topInterests = Object.entries(interestMap)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 10)
+      .map(([key]) => key)
 
-    // Recommendation Aggregation Pipeline
-    const pipeline = [
-      { $match: { isDeleted: false, author: { $ne: req.user._id } } },
-      {
-        $addFields: {
-          hoursElapsed: {
-            $divide: [ { $subtract: [ new Date(), "$createdAt" ] }, 3600000 ]
-          },
-          isFollowing: { $in: [ "$author", followingIds ] },
-          categoryScore: categoryScoreExpr
-        }
-      },
-      {
-        $addFields: {
-          networkBoost: { $cond: [ "$isFollowing", 50, 0 ] },
-          interestBoost: { $multiply: [ "$categoryScore", 50 ] },
-          engagementScore: {
-            $add: [
-              { $multiply: [ { $ifNull: [ "$likesCount", 0 ] }, 3 ] },
-              { $multiply: [ { $ifNull: [ "$commentsCount", 0 ] }, 5 ] },
-              { $multiply: [ { $ifNull: [ "$bookmarksCount", 0 ] }, 4 ] }
+    // Build OR conditions for candidate fetching
+    const candidateConditions = [
+      // Source A: Posts matching top interests (by category or hashtags)
+      ...(topInterests.length > 0
+        ? [{
+            $or: [
+              { category: { $in: topInterests } },
+              { hashtags: { $in: topInterests.map(i => new RegExp(i, 'i')) } },
             ]
-          }
-        }
-      },
-      {
-        $addFields: {
-          score: {
-            $multiply: [
-              { $add: [ "$networkBoost", "$interestBoost", "$engagementScore", 1 ] },
-              { $divide: [ 100, { $add: [ "$hoursElapsed", 1.5 ] } ] }
-            ]
-          }
-        }
-      },
-      { $sort: { score: -1 } },
-      { $skip: page * limit },
-      { $limit: limit }
+          }]
+        : []),
+      // Source B: Posts from followed authors
+      ...(followingIds.length > 0
+        ? [{ author: { $in: followingIds } }]
+        : []),
+      // Source C: Posts with trending hashtags
+      ...(trendingHashtags.size > 0
+        ? [{ hashtags: { $in: [...trendingHashtags].map(t => new RegExp(t, 'i')) } }]
+        : []),
     ]
 
-    const posts = await Post.aggregate(pipeline)
-    const populated = await Post.populate(posts, { path: 'author', select: 'username profilePicture' })
+    // Fallback: if no conditions, get recent posts
+    const matchFilter = {
+      isDeleted: false,
+      author: { $ne: req.user._id },
+      createdAt: { $gte: sevenDaysAgo },
+    }
 
-    const postIds = populated.map(p => p._id)
-    const [userLikes, userBookmarks] = await Promise.all([
-      Like.find({ user: req.user._id, post: { $in: postIds } }),
-      Bookmark.find({ user: req.user._id, post: { $in: postIds } })
-    ])
-    const likedSet = new Set(userLikes.map(l => l.post.toString()))
-    const bookmarkedSet = new Set(userBookmarks.map(b => b.post.toString()))
+    if (candidateConditions.length > 0) {
+      matchFilter.$or = candidateConditions
+    }
 
-    const payload = populated.map(post => {
-      post.isLiked = likedSet.has(post._id.toString())
-      post.isBookmarked = bookmarkedSet.has(post._id.toString())
-      return post
-    })
+    const candidates = await Post.find(matchFilter)
+      .sort({ createdAt: -1 })
+      .limit(200)
+      .populate('author', 'username profilePicture')
 
-    const total = await Post.countDocuments({ isDeleted: false, author: { $ne: req.user._id } })
+    // If candidates are too few, backfill with recent posts
+    let allCandidates = [...candidates]
+    if (allCandidates.length < 50) {
+      const backfill = await Post.find({
+        isDeleted: false,
+        author: { $ne: req.user._id },
+        _id: { $nin: allCandidates.map(p => p._id) },
+      })
+        .sort({ createdAt: -1 })
+        .limit(200 - allCandidates.length)
+        .populate('author', 'username profilePicture')
+      allCandidates = [...allCandidates, ...backfill]
+    }
+
+    // Step 5: Score and rank using recommendation engine
+    const ranked = rankPostsForHome(allCandidates, interestMap, trendingHashtags, authorAffinityMap)
+
+    // Step 6: Paginate
+    const start = page * limit
+    const paginatedPosts = ranked.slice(start, start + limit)
+
+    // Step 7: Attach engagement flags
+    const payload = await attachEngagementFlags(paginatedPosts, req.user._id)
 
     res.status(200).json({
       message:     'for-you feed fetched',
       payload,
       currentPage: page,
-      totalPages:  Math.ceil(total / limit),
-      hasMore:     page * limit + posts.length < total,
+      totalPages:  Math.ceil(ranked.length / limit),
+      hasMore:     start + paginatedPosts.length < ranked.length,
     })
   } catch (err) { next(err) }
 })
 
-// GET Following Feed (Chronological Network Feed)
+// ─── GET Following Feed (Strict — only followed accounts) ────────────────────
 postApp.get('/following', protect, validatePaginationQuery({ maxLimit: 50 }), async (req, res, next) => {
   try {
     const page  = parseInt(req.query.page)  || 0
@@ -178,10 +249,18 @@ postApp.get('/following', protect, validatePaginationQuery({ maxLimit: 50 }), as
     const follows = await Follow.find({ follower: req.user._id })
     const followingIds = follows.map(f => f.following)
 
-    // Filter posts from followed accounts + own posts. Default to all if following no one.
-    const filter = followingIds.length > 0
-      ? { author: { $in: [...followingIds, req.user._id] }, isDeleted: false }
-      : { isDeleted: false }
+    // Strict: only followed accounts. If following no one, return empty.
+    if (followingIds.length === 0) {
+      return res.status(200).json({
+        message:     'following feed fetched',
+        payload:     [],
+        currentPage: page,
+        totalPages:  0,
+        hasMore:     false,
+      })
+    }
+
+    const filter = { author: { $in: followingIds }, isDeleted: false }
 
     const posts = await Post.find(filter)
       .sort({ createdAt: -1 })
@@ -189,20 +268,7 @@ postApp.get('/following', protect, validatePaginationQuery({ maxLimit: 50 }), as
       .limit(limit)
       .populate('author', 'username profilePicture')
 
-    const postIds = posts.map(p => p._id)
-    const [userLikes, userBookmarks] = await Promise.all([
-      Like.find({ user: req.user._id, post: { $in: postIds } }),
-      Bookmark.find({ user: req.user._id, post: { $in: postIds } })
-    ])
-    const likedSet = new Set(userLikes.map(l => l.post.toString()))
-    const bookmarkedSet = new Set(userBookmarks.map(b => b.post.toString()))
-
-    const payload = posts.map(post => {
-      const pObj = post.toObject()
-      pObj.isLiked = likedSet.has(post._id.toString())
-      pObj.isBookmarked = bookmarkedSet.has(post._id.toString())
-      return pObj
-    })
+    const payload = await attachEngagementFlags(posts, req.user._id)
 
     const total = await Post.countDocuments(filter)
     res.status(200).json({
@@ -215,144 +281,150 @@ postApp.get('/following', protect, validatePaginationQuery({ maxLimit: 50 }), as
   } catch (err) { next(err) }
 })
 
-// GET Trending Feed (Time-Decayed Popularity ranking)
+// ─── GET Trending Feed (Hot hashtags with velocity) ──────────────────────────
 postApp.get('/trending', protect, validatePaginationQuery({ maxLimit: 50 }), async (req, res, next) => {
   try {
     const page  = parseInt(req.query.page)  || 0
     const limit = parseInt(req.query.limit) || 10
 
+    // Get trending hashtags
+    const trendingTopics = await calculateTrendingHashtags(72, 20)
+
+    // Get trending posts (high engagement + recency)
     const pipeline = [
       { $match: { isDeleted: false } },
       {
         $addFields: {
           hoursElapsed: {
-            $divide: [ { $subtract: [ new Date(), "$createdAt" ] }, 3600000 ]
-          }
-        }
+            $divide: [{ $subtract: [new Date(), '$createdAt'] }, 3600000],
+          },
+        },
       },
       {
         $addFields: {
           engagementScore: {
             $add: [
-              { $multiply: [ { $ifNull: [ "$likesCount", 0 ] }, 3 ] },
-              { $multiply: [ { $ifNull: [ "$commentsCount", 0 ] }, 5 ] },
-              { $multiply: [ { $ifNull: [ "$bookmarksCount", 0 ] }, 4 ] }
-            ]
-          }
-        }
+              { $multiply: [{ $ifNull: ['$likesCount', 0] }, 3] },
+              { $multiply: [{ $ifNull: ['$commentsCount', 0] }, 5] },
+              { $multiply: [{ $ifNull: ['$repostsCount', 0] }, 4] },
+              { $multiply: [{ $ifNull: ['$bookmarksCount', 0] }, 2] },
+            ],
+          },
+        },
       },
       {
         $addFields: {
           score: {
             $add: [
-              "$engagementScore",
+              '$engagementScore',
               {
                 $divide: [
                   200,
-                  { $pow: [ { $add: [ "$hoursElapsed", 2 ] }, 1.2 ] }
-                ]
-              }
-            ]
-          }
-        }
+                  { $pow: [{ $add: ['$hoursElapsed', 2] }, 1.2] },
+                ],
+              },
+            ],
+          },
+        },
       },
       { $sort: { score: -1 } },
       { $skip: page * limit },
-      { $limit: limit }
+      { $limit: limit },
     ]
 
     const posts = await Post.aggregate(pipeline)
     const populated = await Post.populate(posts, { path: 'author', select: 'username profilePicture' })
 
-    const postIds = populated.map(p => p._id)
-    const [userLikes, userBookmarks] = await Promise.all([
-      Like.find({ user: req.user._id, post: { $in: postIds } }),
-      Bookmark.find({ user: req.user._id, post: { $in: postIds } })
-    ])
-    const likedSet = new Set(userLikes.map(l => l.post.toString()))
-    const bookmarkedSet = new Set(userBookmarks.map(b => b.post.toString()))
-
-    const payload = populated.map(post => {
-      post.isLiked = likedSet.has(post._id.toString())
-      post.isBookmarked = bookmarkedSet.has(post._id.toString())
-      return post
-    })
+    const payload = await attachEngagementFlags(populated, req.user._id)
 
     const total = await Post.countDocuments({ isDeleted: false })
     res.status(200).json({
-      message:     'trending feed fetched',
+      message:        'trending feed fetched',
       payload,
-      currentPage: page,
-      totalPages:  Math.ceil(total / limit),
-      hasMore:     page * limit + posts.length < total,
+      trendingTopics, // Include trending hashtag metadata for the frontend
+      currentPage:    page,
+      totalPages:     Math.ceil(total / limit),
+      hasMore:        page * limit + posts.length < total,
     })
   } catch (err) { next(err) }
 })
 
-// GET Explore Feed (Discovery Engine)
+// ─── GET Explore Feed (Discovery Engine) ─────────────────────────────────────
 postApp.get('/explore', protect, validatePaginationQuery({ maxLimit: 50 }), async (req, res, next) => {
   try {
     const page  = parseInt(req.query.page)  || 0
     const limit = parseInt(req.query.limit) || 10
 
-    const follows = await Follow.find({ follower: req.user._id })
-    const followingIds = follows.map(f => f.following)
+    // Fetch user's onboarding interests
+    const currentUser = await User.findById(req.user._id)
+    const onboardingInterests = currentUser?.onboardingInterests || []
+    const onboardingSet = new Set(onboardingInterests.map(i => i.toLowerCase()))
 
-    // Pull posts from users current user does NOT follow, excluding their own posts
-    const filter = {
-      author: { $nin: [...followingIds, req.user._id] },
-      isDeleted: false
+    // Get trending categories for the 30% trending mix
+    const trendingCategories = await getTrendingCategories(72, 10)
+    const trendingHashtags = await getTrendingHashtagSet(72, 20)
+
+    // Candidate generation for Explore:
+    // 70% from categories NOT in onboarding + 30% from trending categories
+    const unseenCategories = []
+    const allCategories = await Post.distinct('category', { isDeleted: false })
+    for (const cat of allCategories) {
+      if (!onboardingSet.has(cat.toLowerCase())) {
+        unseenCategories.push(cat)
+      }
     }
 
-    const posts = await Post.find(filter)
+    // Fetch unseen category posts (70% of pool)
+    const unseenPosts = await Post.find({
+      isDeleted: false,
+      author: { $ne: req.user._id },
+      ...(unseenCategories.length > 0 ? { category: { $in: unseenCategories } } : {}),
+    })
       .sort({ likesCount: -1, createdAt: -1 })
-      .skip(page * limit)
-      .limit(limit)
+      .limit(140)
       .populate('author', 'username profilePicture')
 
-    const postIds = posts.map(p => p._id)
-    const [userLikes, userBookmarks] = await Promise.all([
-      Like.find({ user: req.user._id, post: { $in: postIds } }),
-      Bookmark.find({ user: req.user._id, post: { $in: postIds } })
-    ])
-    const likedSet = new Set(userLikes.map(l => l.post.toString()))
-    const bookmarkedSet = new Set(userBookmarks.map(b => b.post.toString()))
-
-    const payload = posts.map(post => {
-      const pObj = post.toObject()
-      pObj.isLiked = likedSet.has(post._id.toString())
-      pObj.isBookmarked = bookmarkedSet.has(post._id.toString())
-      return pObj
+    // Fetch trending category posts (30% of pool)
+    const trendingPosts = await Post.find({
+      isDeleted: false,
+      author: { $ne: req.user._id },
+      category: { $in: trendingCategories },
+      _id: { $nin: unseenPosts.map(p => p._id) },
     })
+      .sort({ likesCount: -1, createdAt: -1 })
+      .limit(60)
+      .populate('author', 'username profilePicture')
 
-    const total = await Post.countDocuments(filter)
+    const allCandidates = [...unseenPosts, ...trendingPosts]
+
+    // Score and rank using explore ranking
+    const ranked = rankPostsForExplore(allCandidates, onboardingInterests, trendingHashtags)
+
+    // Paginate
+    const start = page * limit
+    const paginatedPosts = ranked.slice(start, start + limit)
+
+    const payload = await attachEngagementFlags(paginatedPosts, req.user._id)
+
     res.status(200).json({
       message:     'explore feed fetched',
       payload,
       currentPage: page,
-      totalPages:  Math.ceil(total / limit),
-      hasMore:     page * limit + posts.length < total,
+      totalPages:  Math.ceil(ranked.length / limit),
+      hasMore:     start + paginatedPosts.length < ranked.length,
     })
   } catch (err) { next(err) }
 })
 
-// GET Trending Tags (Extracted from Post contents)
+// ─── GET Trending Tags ───────────────────────────────────────────────────────
 postApp.get('/trending-tags', protect, async (req, res, next) => {
   try {
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600000)
-    const result = await Post.aggregate([
-      { $match: { isDeleted: false, createdAt: { $gte: sevenDaysAgo } } },
-      { $unwind: "$hashtags" },
-      { $group: { _id: "$hashtags", count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: 10 }
-    ])
-    const tags = result.map(r => r._id)
-    res.status(200).json({ message: 'trending tags fetched', payload: tags })
+    const trending = await calculateTrendingHashtags(72, 15)
+    res.status(200).json({ message: 'trending tags fetched', payload: trending })
   } catch (err) { next(err) }
 })
 
-// GET User Suggestions / Follow recommendations (Dot Product interest matching)
+// ─── GET User Suggestions / Follow recommendations (Dot Product interest matching)
 postApp.get('/recommended-users', protect, async (req, res, next) => {
   try {
     const currentUser = await User.findById(req.user._id)
@@ -416,20 +488,7 @@ postApp.get('/user/:id', protect, validateObjectIdParam('id'), async (req, res, 
       .sort({ createdAt: -1 })
       .populate('author', 'username profilePicture')
 
-    const postIds = posts.map(p => p._id)
-    const [userLikes, userBookmarks] = await Promise.all([
-      Like.find({ user: req.user._id, post: { $in: postIds } }),
-      Bookmark.find({ user: req.user._id, post: { $in: postIds } })
-    ])
-    const likedSet = new Set(userLikes.map(l => l.post.toString()))
-    const bookmarkedSet = new Set(userBookmarks.map(b => b.post.toString()))
-
-    const payload = posts.map(post => {
-      const pObj = post.toObject()
-      pObj.isLiked = likedSet.has(post._id.toString())
-      pObj.isBookmarked = bookmarkedSet.has(post._id.toString())
-      return pObj
-    })
+    const payload = await attachEngagementFlags(posts, req.user._id)
 
     res.status(200).json({ message: 'user posts fetched', payload })
   } catch (err) { next(err) }
@@ -442,16 +501,18 @@ postApp.get('/:id', protect, validateObjectIdParam('id'), async (req, res, next)
       .populate('author', 'username profilePicture')
     if (!post) return res.status(404).json({ message: 'Post not found' })
 
-    const [likeRecord, bookmarkRecord] = await Promise.all([
+    const [likeRecord, bookmarkRecord, repostRecord] = await Promise.all([
       Like.findOne({ post: post._id, user: req.user._id }),
-      Bookmark.findOne({ post: post._id, user: req.user._id })
+      Bookmark.findOne({ post: post._id, user: req.user._id }),
+      Repost.findOne({ post: post._id, user: req.user._id }),
     ])
 
     res.status(200).json({
       message: 'post found',
       payload: post,
       isLiked: !!likeRecord,
-      isBookmarked: !!bookmarkRecord
+      isBookmarked: !!bookmarkRecord,
+      isReposted: !!repostRecord,
     })
   } catch (err) { next(err) }
 })
@@ -490,7 +551,8 @@ postApp.post('/', protect, upload.single('image'), validateCreatePostBody, async
       hashtags: tags,
       likesCount: 0,
       bookmarksCount: 0,
-      commentsCount: 0
+      commentsCount: 0,
+      repostsCount: 0,
     })
 
     await User.findByIdAndUpdate(req.user._id, { $inc: { postsCount: 1 } })
@@ -499,6 +561,7 @@ postApp.post('/', protect, upload.single('image'), validateCreatePostBody, async
     const pObj = populatedPost.toObject()
     pObj.isLiked = false
     pObj.isBookmarked = false
+    pObj.isReposted = false
 
     res.status(201).json({ message: 'post created', payload: pObj })
   } catch (err) {
@@ -529,7 +592,7 @@ postApp.patch('/:id', protect, validateObjectIdParam('id'), async (req, res, nex
   } catch (err) { next(err) }
 })
 
-// Like / Unlike Toggle
+// ─── Like / Unlike Toggle (+ interest update) ───────────────────────────────
 postApp.post('/:id/like', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const postId = req.params.id
@@ -543,9 +606,15 @@ postApp.post('/:id/like', protect, validateObjectIdParam('id'), async (req, res,
     if (existingLike) {
       await Like.findOneAndDelete({ _id: existingLike._id })
       liked = false
+
+      // Remove interest signal
+      await removeInterestOnDisengagement(userId, post, 'like')
     } else {
       await Like.create({ post: postId, user: userId })
       liked = true
+
+      // Update interest profile
+      await updateInterestsOnEngagement(userId, post, 'like')
 
       // Create notification
       if (post.author.toString() !== userId.toString()) {
@@ -567,7 +636,49 @@ postApp.post('/:id/like', protect, validateObjectIdParam('id'), async (req, res,
   } catch (err) { next(err) }
 })
 
-// Bookmark / Unbookmark Toggle
+// ─── Repost / Unrepost Toggle (+ interest update) ───────────────────────────
+postApp.post('/:id/repost', protect, validateObjectIdParam('id'), async (req, res, next) => {
+  try {
+    const postId = req.params.id
+    const userId = req.user._id
+    const post = await Post.findOne({ _id: postId, isDeleted: false })
+    if (!post) return res.status(404).json({ message: 'Post not found' })
+
+    const existingRepost = await Repost.findOne({ post: postId, user: userId })
+    let reposted = false
+
+    if (existingRepost) {
+      await Repost.findOneAndDelete({ _id: existingRepost._id })
+      reposted = false
+
+      await removeInterestOnDisengagement(userId, post, 'repost')
+    } else {
+      await Repost.create({ post: postId, user: userId })
+      reposted = true
+
+      await updateInterestsOnEngagement(userId, post, 'repost')
+
+      // Create notification
+      if (post.author.toString() !== userId.toString()) {
+        await Notification.create({
+          recipient: post.author,
+          sender:    userId,
+          type:      'repost',
+          post:      postId
+        })
+      }
+    }
+
+    const updatedPost = await Post.findById(postId)
+    res.status(200).json({
+      message:      'repost toggled',
+      reposted,
+      repostsCount: updatedPost.repostsCount,
+    })
+  } catch (err) { next(err) }
+})
+
+// ─── Bookmark / Unbookmark Toggle (+ interest update) ────────────────────────
 postApp.post('/:id/bookmark', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const postId = req.params.id
@@ -581,9 +692,13 @@ postApp.post('/:id/bookmark', protect, validateObjectIdParam('id'), async (req, 
     if (existingBookmark) {
       await Bookmark.findOneAndDelete({ _id: existingBookmark._id })
       bookmarked = false
+
+      await removeInterestOnDisengagement(userId, post, 'bookmark')
     } else {
       await Bookmark.create({ post: postId, user: userId })
       bookmarked = true
+
+      await updateInterestsOnEngagement(userId, post, 'bookmark')
     }
 
     const updatedPost = await Post.findById(postId)

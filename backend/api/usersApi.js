@@ -82,7 +82,10 @@ userApp.post('/onboarding-interests', protect, validateOnboardingInterestsBody, 
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
-      { interestScores },
+      {
+        interestScores,
+        onboardingInterests: interests.map(i => i.toLowerCase().trim()),
+      },
       { new: true }
     )
 

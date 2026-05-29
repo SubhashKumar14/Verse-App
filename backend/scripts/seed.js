@@ -27,6 +27,8 @@ import { Follow } from '../models/Follow.js'
 import { Like } from '../models/Like.js'
 import { Bookmark } from '../models/Bookmark.js'
 import { Notification } from '../models/Notification.js'
+import { Repost } from '../models/Repost.js'
+import { UserHashtagInteraction } from '../models/UserHashtagInteraction.js'
 
 // Configure DNS fallback resolver for SRV records dynamically in connection
 
@@ -420,7 +422,9 @@ async function seed() {
       Follow.deleteMany({}),
       Like.deleteMany({}),
       Bookmark.deleteMany({}),
-      Notification.deleteMany({})
+      Notification.deleteMany({}),
+      Repost.deleteMany({}),
+      UserHashtagInteraction.deleteMany({})
     ])
     console.log('Collections cleared.')
 
@@ -504,6 +508,7 @@ async function seed() {
         followersCount: 0,
         followingCount: 0,
         interestScores,
+        onboardingInterests: userInterests,
         privacy: 'public',
         // metadata for temporary use in script
         tempType: type,
@@ -815,6 +820,119 @@ async function seed() {
 
     console.log(`Total comments generated: ${commentsData.length}`)
 
+    // 7. Generate Reposts (~10,000 reposts)
+    console.log('Generating reposts (~10,000 reposts)...')
+    const repostsData = []
+    const repostPairs = new Set()
+
+    postsData.forEach(post => {
+      let repostsTarget = 0
+      const authorObj = usersData.find(u => u._id.toString() === post.author.toString())
+      if (authorObj.tempType === userTypes.INFLUENCER) {
+        repostsTarget = randomRange(20, 40)
+      } else if (authorObj.tempType === userTypes.CREATOR) {
+        repostsTarget = randomRange(5, 12)
+      } else {
+        repostsTarget = randomRange(0, 3)
+      }
+
+      const interestUsers = usersByCategory[post.category] || []
+      let repostCount = 0
+      let attempts = 0
+      const maxAttempts = repostsTarget * 3
+
+      while (repostCount < repostsTarget && attempts < maxAttempts) {
+        attempts++
+        let reposter = null
+        if (Math.random() < 0.7 && interestUsers.length > 0) {
+          reposter = randomSelect(interestUsers)
+        } else {
+          reposter = randomSelect(usersData)
+        }
+
+        if (reposter._id.toString() !== post.author.toString()) {
+          const key = `${post._id}-${reposter._id}`
+          if (!repostPairs.has(key)) {
+            repostPairs.add(key)
+            repostsData.push({
+              post: post._id,
+              user: reposter._id,
+              createdAt: new Date(post.createdAt.getTime() + randomRange(2, 72) * 3600000)
+            })
+            post.repostsCount = (post.repostsCount || 0) + 1
+            repostCount++
+          }
+        }
+      }
+    })
+
+    console.log(`Total reposts generated: ${repostsData.length}`)
+
+    // 8. Generate UserHashtagInteraction records from likes, comments, reposts
+    console.log('Generating UserHashtagInteraction records...')
+    const interactionMap = {} // key: `${userId}-${hashtag}`
+
+    const trackInteraction = (userId, hashtags, action) => {
+      for (const rawTag of hashtags) {
+        const tag = rawTag.toLowerCase().replace(/^#/, '')
+        const key = `${userId}-${tag}`
+        if (!interactionMap[key]) {
+          interactionMap[key] = { user: userId, hashtag: tag, likes: 0, comments: 0, reposts: 0, bookmarks: 0 }
+        }
+        interactionMap[key][action]++
+      }
+    }
+
+    // Build post lookup for fast access
+    const postById = {}
+    postsData.forEach(p => { postById[p._id.toString()] = p })
+
+    // Track likes
+    likesData.forEach(like => {
+      const post = postById[like.post.toString()]
+      if (post && post.hashtags?.length > 0) {
+        trackInteraction(like.user, post.hashtags, 'likes')
+      }
+    })
+
+    // Track comments
+    commentsData.forEach(comment => {
+      const post = postById[comment.post.toString()]
+      if (post && post.hashtags?.length > 0) {
+        trackInteraction(comment.author, post.hashtags, 'comments')
+      }
+    })
+
+    // Track reposts
+    repostsData.forEach(repost => {
+      const post = postById[repost.post.toString()]
+      if (post && post.hashtags?.length > 0) {
+        trackInteraction(repost.user, post.hashtags, 'reposts')
+      }
+    })
+
+    // Track bookmarks
+    bookmarksData.forEach(bookmark => {
+      const post = postById[bookmark.post.toString()]
+      if (post && post.hashtags?.length > 0) {
+        trackInteraction(bookmark.user, post.hashtags, 'bookmarks')
+      }
+    })
+
+    // Calculate scores for each interaction
+    const STRONG_BOOST_THRESHOLD = 3
+    const STRONG_BOOST_VALUE = 0.15
+    const interactionsData = Object.values(interactionMap).map(rec => {
+      const total = rec.likes + rec.comments + rec.reposts + rec.bookmarks
+      const baseScore = (rec.likes * 0.05) + (rec.comments * 0.08) + (rec.reposts * 0.10) + (rec.bookmarks * 0.03)
+      const strongBoost = total >= STRONG_BOOST_THRESHOLD ? STRONG_BOOST_VALUE : 0
+      rec.score = parseFloat((baseScore + strongBoost).toFixed(4))
+      rec.lastInteractedAt = new Date(Date.now() - randomRange(1, 72) * 3600000)
+      return rec
+    })
+
+    console.log(`Total UserHashtagInteraction records: ${interactionsData.length}`)
+
     // ─── BULK INSERTIONS (WITH CHUNKING TO PREVENT RAM/TIMEOUT ISSUES) ─────
     console.log('Executing bulk insertions into MongoDB Atlas...')
 
@@ -866,6 +984,22 @@ async function seed() {
       console.log(`Inserted comments chunk ${idx + 1}/${commentChunks.length}`)
     }
 
+    // Batch insert reposts (size ~10,000) in chunks of 5,000
+    console.log('Inserting reposts...')
+    const repostChunks = chunkArray(repostsData, 5000)
+    for (let idx = 0; idx < repostChunks.length; idx++) {
+      await Repost.insertMany(repostChunks[idx], { ordered: false })
+      console.log(`Inserted reposts chunk ${idx + 1}/${repostChunks.length}`)
+    }
+
+    // Batch insert UserHashtagInteraction records in chunks of 5,000
+    console.log('Inserting UserHashtagInteraction records...')
+    const interactionChunks = chunkArray(interactionsData, 5000)
+    for (let idx = 0; idx < interactionChunks.length; idx++) {
+      await UserHashtagInteraction.insertMany(interactionChunks[idx], { ordered: false })
+      console.log(`Inserted interaction chunk ${idx + 1}/${interactionChunks.length}`)
+    }
+
     console.log('\n=========================================')
     console.log('DATABASE SEEDING COMPLETED SUCCESSFULLY!')
     console.log('=========================================')
@@ -875,6 +1009,8 @@ async function seed() {
     console.log(`Likes created       : ${likesData.length}`)
     console.log(`Bookmarks created   : ${bookmarksData.length}`)
     console.log(`Comments created    : ${commentsData.length}`)
+    console.log(`Reposts created     : ${repostsData.length}`)
+    console.log(`Interactions created: ${interactionsData.length}`)
     console.log('\nSample Creator Accounts (Password is "password123"):')
     const sampleCreators = creators.slice(0, 5)
     sampleCreators.forEach(c => {

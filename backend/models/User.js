@@ -83,6 +83,12 @@ const userSchema = new mongoose.Schema(
       default: {},
     },
 
+    // ─── Immutable onboarding selections (used by Explore to show unseen categories)
+    onboardingInterests: {
+      type:    [String],
+      default: [],
+    },
+
     privacy: {
       type:    String,
       enum:    ['public', 'private', 'followers_only'],

@@ -2,14 +2,16 @@
  * frontend/src/components/posts/PostCard.jsx
  *
  * Feed item renderer for a single post.
- * Handles optimistic like toggling, archive (soft delete) for the owner,
- * and links to the post detail page.
+ * Handles optimistic like toggling, repost toggling, archive (soft delete)
+ * for the owner, and links to the post detail page.
+ * Hashtags in content are rendered as clickable links to search.
  */
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { likePost, softDeletePost } from '../../services/postService'
+import { likePost, softDeletePost, repostPost } from '../../services/postService'
 import { HiHeart, HiOutlineHeart, HiChat, HiTrash } from 'react-icons/hi'
+import { HiArrowPath } from 'react-icons/hi2'
 import {
   postCard, postAuthorRow, postUsername, postTime,
   postContent, postActions, postActionBtn, postActionBtnActive
@@ -29,10 +31,41 @@ const formatTime = (date) => {
   return new Date(date).toLocaleDateString()
 }
 
-const PostCard = ({ post, onDelete, showLink = true }) => {
+/**
+ * Render post content with clickable hashtags.
+ * Hashtags become links that navigate to /search?q=#hashtag
+ */
+const renderContentWithHashtags = (content, navigate) => {
+  if (!content) return null
+
+  const parts = content.split(/(#[a-zA-Z0-9_]+)/g)
+  return parts.map((part, i) => {
+    if (part.match(/^#[a-zA-Z0-9_]+$/)) {
+      return (
+        <span
+          key={i}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            navigate(`/search?q=${encodeURIComponent(part)}`)
+          }}
+          className="text-[var(--accent)] hover:underline cursor-pointer font-medium"
+        >
+          {part}
+        </span>
+      )
+    }
+    return <span key={i}>{part}</span>
+  })
+}
+
+const PostCard = ({ post, onDelete, showLink = true, repostedBy = null }) => {
   const { user } = useAuth()
-  const [liked, setLiked] = useState(post.likes?.includes(user?._id))
+  const navigate = useNavigate()
+  const [liked, setLiked] = useState(post.isLiked || post.likes?.includes(user?._id))
   const [likesCount, setLikesCount] = useState(post.likesCount || post.likes?.length || 0)
+  const [reposted, setReposted] = useState(post.isReposted || false)
+  const [repostsCount, setRepostsCount] = useState(post.repostsCount || 0)
   const [deleting, setDeleting] = useState(false)
 
   const author = post.author || {}
@@ -47,6 +80,23 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
       setLiked(liked)
       setLikesCount(likesCount)
       toast.error('Failed to like post')
+    }
+  }
+
+  const handleRepost = async () => {
+    setReposted(!reposted)
+    setRepostsCount((c) => reposted ? c - 1 : c + 1)
+    try {
+      const { data } = await repostPost(post._id)
+      if (!data.reposted) {
+        toast.success('Repost removed')
+      } else {
+        toast.success('Reposted!')
+      }
+    } catch {
+      setReposted(reposted)
+      setRepostsCount(repostsCount)
+      toast.error('Failed to repost')
     }
   }
 
@@ -65,6 +115,14 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
 
   return (
     <div className={`${postCard} group`}>
+      {/* Repost indicator */}
+      {repostedBy && (
+        <div className="flex items-center gap-2 text-xs text-[var(--muted)] mb-2 pl-12">
+          <HiArrowPath className="text-[13px]" />
+          <span>{repostedBy} reposted</span>
+        </div>
+      )}
+
       {/* Author row — avatar, username · time inline */}
       <div className={postAuthorRow}>
         <Link to={`/profile/${author._id}`} aria-label={`${author.username}'s profile`} className="shrink-0">
@@ -93,14 +151,18 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
         )}
       </div>
 
-      {/* Content */}
+      {/* Content — with clickable hashtags */}
       <div className="mb-4">
         {showLink ? (
           <Link to={`/post/${post._id}`}>
-            <p className={postContent}>{post.content}</p>
+            <p className={postContent}>
+              {renderContentWithHashtags(post.content, navigate)}
+            </p>
           </Link>
         ) : (
-          <p className={postContent}>{post.content}</p>
+          <p className={postContent}>
+            {renderContentWithHashtags(post.content, navigate)}
+          </p>
         )}
 
         {/* Attached Image — borderless, rounded-xl */}
@@ -117,7 +179,7 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
         )}
       </div>
 
-      {/* Actions — no top border, just spacing */}
+      {/* Actions — like, comment, repost */}
       <div className={postActions}>
         <button
           onClick={handleLike}
@@ -132,6 +194,18 @@ const PostCard = ({ post, onDelete, showLink = true }) => {
           <HiChat className="text-[15px]" />
           <span>{post.commentsCount || 0}</span>
         </Link>
+        <button
+          onClick={handleRepost}
+          aria-pressed={reposted}
+          aria-label={reposted ? 'Remove repost' : 'Repost'}
+          className={reposted
+            ? `${postActionBtn} text-emerald-500 font-semibold`
+            : postActionBtn
+          }
+        >
+          <HiArrowPath className="text-[15px]" />
+          <span>{repostsCount}</span>
+        </button>
       </div>
     </div>
   )

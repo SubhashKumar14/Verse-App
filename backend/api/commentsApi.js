@@ -13,6 +13,7 @@ import { protect } from '../middleware/authMiddleware.js'
 import { validateCreateCommentBody, validateObjectIdParam } from '../middleware/validationMiddleware.js'
 import { Comment } from '../models/Comment.js'
 import { Post } from '../models/Post.js'
+import { updateInterestsOnEngagement } from '../services/interestService.js'
 
 export const commentApp = express.Router()
 
@@ -41,6 +42,9 @@ commentApp.post('/:postId', protect, validateObjectIdParam('postId'), validateCr
     // increment commentsCount on the post
     post.commentsCount = (post.commentsCount || 0) + 1
     await post.save()
+
+    // Update user interest profile based on the commented post's hashtags
+    await updateInterestsOnEngagement(req.user._id, post, 'comment')
 
     const populated = await comment.populate('author', 'username profilePicture')
     res.status(201).json({ message: 'comment added', payload: populated })

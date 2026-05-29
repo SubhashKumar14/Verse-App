@@ -1,3 +1,9 @@
+/**
+ * frontend/src/components/layout/MobileFAB.jsx
+ *
+ * Floating action button for mobile.
+ * Only shown on the Home route; currently scrolls to the composer.
+ */
 import { useLocation } from 'react-router-dom'
 import { HiPlus } from 'react-icons/hi'
 import { useAuth } from '../../context/AuthContext'

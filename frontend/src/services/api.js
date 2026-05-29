@@ -1,3 +1,11 @@
+/**
+ * frontend/src/services/api.js
+ *
+ * Axios instance shared by all frontend service modules.
+ * - Uses `VITE_API_BASE` when provided, otherwise defaults to `/api`
+ * - Sends cookies (`withCredentials`) for cookie-based auth
+ * - Redirects to /login when the API returns 401 (except initial session check)
+ */
 import axios from 'axios'
 
 const base = import.meta.env.VITE_API_BASE ?? '/api'

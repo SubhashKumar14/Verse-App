@@ -1,12 +1,23 @@
+/**
+ * backend/api/commentsApi.js
+ *
+ * Express router for comment features:
+ * - List comments for a post (thread order)
+ * - Create comments and increment Post.commentsCount
+ * - Soft-delete + restore (archive) comments
+ *
+ * Mounted at `/api/comments` in backend/server.js.
+ */
 import express from 'express'
 import { protect } from '../middleware/authMiddleware.js'
+import { validateCreateCommentBody, validateObjectIdParam } from '../middleware/validationMiddleware.js'
 import { Comment } from '../models/Comment.js'
 import { Post } from '../models/Post.js'
 
 export const commentApp = express.Router()
 
 // get all active comments for a post (protected)
-commentApp.get('/:postId', protect, async (req, res, next) => {
+commentApp.get('/:postId', protect, validateObjectIdParam('postId'), async (req, res, next) => {
   try {
     const comments = await Comment.find({ post: req.params.postId, isDeleted: false })
       .sort({ createdAt: 1 })   // oldest first — thread order
@@ -16,12 +27,9 @@ commentApp.get('/:postId', protect, async (req, res, next) => {
 })
 
 // add comment to a post (protected)
-commentApp.post('/:postId', protect, async (req, res, next) => {
+commentApp.post('/:postId', protect, validateObjectIdParam('postId'), validateCreateCommentBody, async (req, res, next) => {
   try {
     const { text } = req.body
-    if (!text || text.trim() === '') {
-      return res.status(400).json({ message: 'Comment text is required' })
-    }
     const post = await Post.findOne({ _id: req.params.postId, isDeleted: false })
     if (!post) return res.status(404).json({ message: 'Post not found' })
 
@@ -40,7 +48,7 @@ commentApp.post('/:postId', protect, async (req, res, next) => {
 })
 
 // soft delete comment (protected — author only)
-commentApp.patch('/:id', protect, async (req, res, next) => {
+commentApp.patch('/:id', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const comment = await Comment.findById(req.params.id)
     if (!comment || comment.isDeleted) {
@@ -69,7 +77,7 @@ commentApp.get('/archives/user', protect, async (req, res, next) => {
 })
 
 // restore soft deleted comment (protected — author only)
-commentApp.patch('/:id/restore', protect, async (req, res, next) => {
+commentApp.patch('/:id/restore', protect, validateObjectIdParam('id'), async (req, res, next) => {
   try {
     const comment = await Comment.findById(req.params.id)
     if (!comment || !comment.isDeleted) {

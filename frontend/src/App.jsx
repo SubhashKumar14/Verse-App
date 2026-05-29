@@ -1,3 +1,10 @@
+/**
+ * frontend/src/App.jsx
+ *
+ * App shell + router.
+ * Wraps the app in Theme/Auth providers, sets up client-side routes, and
+ * enforces auth via <ProtectedRoute /> for private pages.
+ */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth, AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'

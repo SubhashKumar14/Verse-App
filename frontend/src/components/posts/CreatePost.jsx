@@ -1,3 +1,10 @@
+/**
+ * frontend/src/components/posts/CreatePost.jsx
+ *
+ * Post composer component.
+ * Lets an authenticated user write text, optionally attach an image,
+ * and submit a new post via the postService API.
+ */
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '../../context/AuthContext'

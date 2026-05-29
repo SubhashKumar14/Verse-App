@@ -1,3 +1,9 @@
+/**
+ * frontend/src/components/common/LoadingSpinner.jsx
+ *
+ * Shared loading indicator.
+ * Supports a small/medium/large size preset and uses the theme accent color.
+ */
 import { loadingClass } from '../../styles/common'
 
 const LoadingSpinner = ({ size = 'md' }) => {

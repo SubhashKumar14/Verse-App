@@ -1,3 +1,13 @@
+/**
+ * backend/middleware/authMiddleware.js
+ *
+ * Request authentication middleware.
+ * Verifies a JWT from either:
+ * - the `token` httpOnly cookie (preferred), or
+ * - an `Authorization: Bearer <token>` header (compat/debug)
+ *
+ * On success, attaches the full User document to `req.user`.
+ */
 import jwt from 'jsonwebtoken'
 import { User } from '../models/User.js'
 

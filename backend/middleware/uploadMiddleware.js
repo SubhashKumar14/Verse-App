@@ -1,3 +1,9 @@
+/**
+ * backend/middleware/uploadMiddleware.js
+ *
+ * Multer configuration used by routes that accept image uploads.
+ * Uses in-memory storage so `mediaService` can upload the buffer to Cloudinary.
+ */
 import multer from 'multer'
 
 // Keep uploads in memory so Cloudinary can consume the buffer directly.

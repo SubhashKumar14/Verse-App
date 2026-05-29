@@ -1,3 +1,13 @@
+/**
+ * backend/server.js
+ *
+ * Express API entrypoint.
+ * - Loads env vars (./.env)
+ * - Connects to MongoDB
+ * - Configures CORS, cookies, and body parsing
+ * - Mounts feature routers under `/api/*`
+ * - Registers the global error handler and starts listening
+ */
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
@@ -32,7 +42,9 @@ app.use(cors({
     // allow requests with no origin (e.g., curl, server-side)
     if (!origin) return callback(null, true)
     if (allowedOrigins.includes(origin)) return callback(null, true)
-    return callback(new Error('CORS origin not allowed'), false)
+    const err = new Error('Not allowed by CORS')
+    err.statusCode = 403
+    return callback(err, false)
   },
   credentials: true,
 }))
@@ -52,7 +64,8 @@ app.get('/', (req, res) => res.json({ message: 'Threadly API is running' }))
 
 // ─── 404 handler ──────────────────────────────────────────────────────────
 app.use((req, res) => {
-  res.status(404).json({ message: `Route ${req.originalUrl} not found` })
+  console.log(req.url)
+  res.status(404).json({ message: `${req.url} is invalid path` })
 })
 
 // ─── Global error handler (must be last) ─────────────────────────────────

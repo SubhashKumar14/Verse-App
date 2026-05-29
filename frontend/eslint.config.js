@@ -1,3 +1,9 @@
+/**
+ * frontend/eslint.config.js
+ *
+ * ESLint flat-config for the frontend.
+ * Lints JS/JSX with React Hooks + React Refresh rules and ignores build output.
+ */
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'

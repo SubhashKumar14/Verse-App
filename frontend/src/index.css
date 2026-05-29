@@ -1,3 +1,11 @@
+/*
+  frontend/src/index.css
+
+  Global styles + design tokens.
+  Defines theme variables (light/dark), Tailwind import, base element styling,
+  and small utilities shared by the whole app.
+*/
+
 @import "tailwindcss";
 
 /* ================================================================

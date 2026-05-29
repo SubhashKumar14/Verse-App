@@ -1,3 +1,10 @@
+/**
+ * frontend/src/pages/Notifications.jsx
+ *
+ * Notifications inbox.
+ * Lists recent notifications for the current user and supports marking them
+ * (or all of them) as read. Links back to the relevant post/profile.
+ */
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getNotifications, readAllNotifications, readNotification } from '../services/notificationService'

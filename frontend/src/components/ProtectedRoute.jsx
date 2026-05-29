@@ -1,3 +1,10 @@
+/**
+ * frontend/src/components/ProtectedRoute.jsx
+ *
+ * Route guard component.
+ * Renders a loading spinner while auth state initializes and redirects
+ * unauthenticated users to /login.
+ */
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { loadingClass } from '../styles/common'

@@ -1,3 +1,11 @@
+/**
+ * backend/models/Post.js
+ *
+ * Mongoose Post model.
+ * Supports text posts and optional image posts, plus soft-delete.
+ * Tracks denormalized counters (likes/comments/bookmarks) for fast feeds.
+ * Includes indexes to support feeds and basic text search.
+ */
 import mongoose from 'mongoose'
 
 const postSchema = new mongoose.Schema(

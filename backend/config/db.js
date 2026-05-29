@@ -1,3 +1,10 @@
+/**
+ * backend/config/db.js
+ *
+ * MongoDB connection helper (Mongoose).
+ * Selects the URI based on CLI flags and env vars and prints a helpful mode label.
+ * Includes a DNS fallback for Atlas SRV connections to avoid local DNS issues.
+ */
 import mongoose from 'mongoose'
 import dns from 'dns'
 

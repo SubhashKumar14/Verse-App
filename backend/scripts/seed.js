@@ -1,3 +1,12 @@
+/**
+ * backend/scripts/seed.js
+ *
+ * Development seed script.
+ * Populates the database with sample users, posts (with categories/hashtags),
+ * comments, follows, likes, bookmarks, and notifications.
+ *
+ * Intended for local/dev environments only.
+ */
 import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
 import dns from 'dns'

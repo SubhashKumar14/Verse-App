@@ -1,3 +1,10 @@
+/**
+ * backend/models/Notification.js
+ *
+ * Mongoose Notification model.
+ * Stores events like follow/like/comment, linking sender/recipient (and
+ * optionally a post) and a read/unread flag.
+ */
 import mongoose from 'mongoose'
 
 const notificationSchema = new mongoose.Schema(

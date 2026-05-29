@@ -1,3 +1,12 @@
+/**
+ * backend/check.js
+ *
+ * Tiny one-off debug script to inspect MongoDB data during development.
+ * Connects to the local DB and prints posts that have an imageUrl.
+ *
+ * Note: This file uses CommonJS (`require`) even though the backend is ESM.
+ * It's meant as a standalone dev helper.
+ */
 const mongoose = require('mongoose');
 
 async function check() {

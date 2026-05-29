@@ -1,3 +1,9 @@
+/**
+ * backend/models/Bookmark.js
+ *
+ * Mongoose Bookmark model.
+ * One Bookmark per (user, post). Hooks keep Post.bookmarksCount in sync.
+ */
 import mongoose from 'mongoose'
 
 const bookmarkSchema = new mongoose.Schema(

@@ -1,3 +1,10 @@
+/**
+ * frontend/src/components/common/Avatar.jsx
+ *
+ * Reusable avatar component.
+ * Shows an image when available, otherwise falls back to the user's initial.
+ * Automatically resets the error state when `src` changes.
+ */
 import { useEffect, useState } from 'react'
 
 const Avatar = ({
@@ -10,6 +17,7 @@ const Avatar = ({
   const [imageFailed, setImageFailed] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setImageFailed(false)
   }, [src])
 

@@ -1,3 +1,14 @@
+/**
+ * backend/models/User.js
+ *
+ * Mongoose User model.
+ * Stores identity/profile fields, counts (followers/following/posts),
+ * onboarding interest scores, and privacy settings.
+ * Includes:
+ * - password hashing pre-save hook
+ * - `matchPassword` instance method
+ * - text index for username/bio search
+ */
 import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
 

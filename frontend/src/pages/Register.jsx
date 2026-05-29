@@ -1,3 +1,10 @@
+/**
+ * frontend/src/pages/Register.jsx
+ *
+ * Registration page.
+ * Creates a new account via AuthContext.register() then sends the user to
+ * onboarding for interest selection.
+ */
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'

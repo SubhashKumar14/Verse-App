@@ -1,3 +1,9 @@
+/**
+ * backend/models/Like.js
+ *
+ * Mongoose Like model.
+ * One Like per (user, post). Hooks keep Post.likesCount in sync.
+ */
 import mongoose from 'mongoose'
 
 const likeSchema = new mongoose.Schema(

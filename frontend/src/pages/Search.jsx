@@ -1,3 +1,10 @@
+/**
+ * frontend/src/pages/Search.jsx
+ *
+ * Explore/search page.
+ * Searches for users based on the `q` query parameter and shows recommended
+ * trending topics for quick discovery.
+ */
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { searchUsers } from '../services/userService'

@@ -1,3 +1,9 @@
+/**
+ * frontend/src/components/layout/Sidebar.jsx
+ *
+ * Desktop left navigation rail.
+ * Renders primary routes, the user's profile link, and logout.
+ */
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { HiHome, HiSearch, HiArchive, HiCog, HiUser, HiLogout, HiBell } from 'react-icons/hi'

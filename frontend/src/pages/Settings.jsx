@@ -1,3 +1,10 @@
+/**
+ * frontend/src/pages/Settings.jsx
+ *
+ * Settings page.
+ * - Appearance: theme preference (system/light/dark)
+ * - Public profile: update username/bio/avatar via multipart FormData
+ */
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '../context/AuthContext'

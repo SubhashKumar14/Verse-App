@@ -12,27 +12,22 @@
  */
 import express from 'express'
 import { protect } from '../middleware/authMiddleware.js'
+import upload from '../middleware/uploadMiddleware.js'
 import { validateObjectIdParam } from '../middleware/validationMiddleware.js'
 import { Message } from '../models/Message.js'
 import { User } from '../models/User.js'
+import { uploadImage, deleteCloudinaryImage } from '../services/mediaService.js'
 
 export const messagesApp = express.Router()
 
-// 1. Send a message (protected)
-messagesApp.post('/', protect, async (req, res, next) => {
+// 1. Send a message (protected + optional image)
+messagesApp.post('/', protect, upload.single('image'), async (req, res, next) => {
+  let uploadedImage = null
   try {
     const { recipientId, text } = req.body
 
     if (!recipientId) {
       return res.status(400).json({ message: 'Recipient ID is required' })
-    }
-
-    if (!text || !text.trim()) {
-      return res.status(400).json({ message: 'Message text cannot be empty' })
-    }
-
-    if (text.length > 1000) {
-      return res.status(400).json({ message: 'Message cannot exceed 1000 characters' })
     }
 
     if (recipientId === req.user._id.toString()) {
@@ -45,10 +40,31 @@ messagesApp.post('/', protect, async (req, res, next) => {
       return res.status(404).json({ message: 'Recipient user not found' })
     }
 
+    let imageUrl = ''
+    let imagePublicId = ''
+
+    if (req.file) {
+      uploadedImage = await uploadImage(req.file)
+      imageUrl = uploadedImage.secure_url
+      imagePublicId = uploadedImage.public_id
+    }
+
+    const messageText = text ? text.trim() : ''
+
+    if (!messageText && !imageUrl) {
+      return res.status(400).json({ message: 'Message text or image is required' })
+    }
+
+    if (messageText.length > 1000) {
+      return res.status(400).json({ message: 'Message cannot exceed 1000 characters' })
+    }
+
     const message = await Message.create({
       sender: req.user._id,
       recipient: recipientId,
-      text: text.trim(),
+      text: messageText,
+      imageUrl,
+      imagePublicId,
     })
 
     // Populate sender details for immediate display
@@ -58,6 +74,13 @@ messagesApp.post('/', protect, async (req, res, next) => {
 
     res.status(201).json({ message: 'message sent', payload: populated })
   } catch (err) {
+    if (uploadedImage?.public_id) {
+      try {
+        await deleteCloudinaryImage(uploadedImage.public_id)
+      } catch {
+        // fail silently
+      }
+    }
     next(err)
   }
 })
@@ -130,6 +153,7 @@ messagesApp.get('/conversations', protect, async (req, res, next) => {
             sender: '$lastMessage.sender',
             recipient: '$lastMessage.recipient',
             text: '$lastMessage.text',
+            imageUrl: '$lastMessage.imageUrl',
             isRead: '$lastMessage.isRead',
             createdAt: '$lastMessage.createdAt'
           },

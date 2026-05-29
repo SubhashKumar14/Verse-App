@@ -15,7 +15,7 @@ import { useAuth } from '../context/AuthContext'
 import Avatar from '../components/common/Avatar'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import EmptyState from '../components/common/EmptyState'
-import { HiArrowLeft, HiPaperAirplane, HiSearch, HiMail } from 'react-icons/hi'
+import { HiArrowLeft, HiPaperAirplane, HiSearch, HiMail, HiPhotograph, HiX } from 'react-icons/hi'
 import {
   inputClass, primaryBtn, mutedText, bodyText
 } from '../styles/common'
@@ -38,9 +38,32 @@ const Messages = () => {
   const [loadingMessages, setLoadingMessages] = useState(false)
   const [sending, setSending] = useState(false)
 
+  const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
+
   const messageEndRef = useRef(null)
+  const fileInputRef = useRef(null)
   const pollIntervalRef = useRef(null)
   const convPollIntervalRef = useRef(null)
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setImageFile(file)
+      setImagePreview(URL.createObjectURL(file))
+    }
+  }
+
+  const handleRemoveImage = () => {
+    setImageFile(null)
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview)
+    }
+    setImagePreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
 
   // Scroll to bottom helper
   const scrollToBottom = (behavior = 'smooth') => {
@@ -160,10 +183,17 @@ const Messages = () => {
   // Send message
   const handleSend = async (e) => {
     e.preventDefault()
-    if (!text.trim() || !chatUserId || sending) return
-
     const messageText = text.trim()
+    if ((!messageText && !imageFile) || !chatUserId || sending) return
+
     setText('')
+    const currentImageFile = imageFile
+    const currentImagePreview = imagePreview
+
+    setImageFile(null)
+    setImagePreview(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+
     setSending(true)
 
     // Optimistic UI update
@@ -176,19 +206,23 @@ const Messages = () => {
       },
       recipient: chatUserId,
       text: messageText,
+      imageUrl: currentImagePreview || '',
       createdAt: new Date().toISOString(),
       isRead: false
     }
     setMessages(prev => [...prev, optimisticMessage])
 
     try {
-      const { data } = await sendMessage(chatUserId, messageText)
+      const { data } = await sendMessage(chatUserId, messageText, currentImageFile)
       // Replace optimistic message with actual DB message
       setMessages(prev => prev.map(m => m._id === optimisticMessage._id ? data.payload : m))
       // Update conversations list right away to show latest message
       loadConversations(false)
     } catch {
       toast.error('Failed to send message')
+      setText(messageText)
+      setImageFile(currentImageFile)
+      setImagePreview(currentImagePreview)
       // Remove optimistic message on error
       setMessages(prev => prev.filter(m => m._id !== optimisticMessage._id))
     } finally {
@@ -309,7 +343,8 @@ const Messages = () => {
                         </div>
                         <div className="flex justify-between items-center gap-2">
                           <p className={`text-[12px] truncate ${isUnread ? 'font-semibold text-[var(--text)]' : 'text-[var(--muted)]'}`}>
-                            {conv.lastMessage.sender === currentUser._id && 'You: '}{conv.lastMessage.text}
+                            {conv.lastMessage.sender === currentUser._id && 'You: '}
+                            {conv.lastMessage.text ? conv.lastMessage.text : (conv.lastMessage.imageUrl ? '📷 Sent a photo' : '')}
                           </p>
                           {isUnread && (
                             <span className="bg-[var(--accent)] text-[var(--accent-ink)] text-[10px] font-bold h-4 min-w-4 px-1 flex items-center justify-center rounded-full shrink-0">
@@ -379,8 +414,17 @@ const Messages = () => {
                           isMe 
                             ? 'bg-[var(--accent)] text-[var(--accent-ink)] border-[var(--accent-border)] rounded-tr-sm' 
                             : 'bg-[var(--surface)] text-[var(--text)] border-[var(--border)] rounded-tl-sm'
-                        }`}>
-                          <p>{msg.text}</p>
+                        } ${msg.imageUrl ? 'p-1.5' : ''}`}>
+                          {msg.imageUrl && (
+                            <div className="mb-1 overflow-hidden rounded-xl max-w-full">
+                              <img 
+                                src={msg.imageUrl} 
+                                alt="Attachment" 
+                                className="max-h-60 max-w-full object-cover hover:opacity-95 transition-opacity" 
+                              />
+                            </div>
+                          )}
+                          {msg.text && <p className="px-2 py-0.5">{msg.text}</p>}
                         </div>
                         {/* Time label */}
                         <span className="text-[9px] text-[var(--muted)] mt-1 font-mono tabular-nums px-1">
@@ -394,25 +438,63 @@ const Messages = () => {
               <div ref={messageEndRef} />
             </div>
 
-            {/* Input Composer */}
-            <form onSubmit={handleSend} className="bg-[var(--surface)] p-3 border-t border-[var(--border)] flex items-center gap-2 shrink-0">
-              <input
-                type="text"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder={`Message @${activeChatUser?.username || 'user'}...`}
-                disabled={sending}
-                className={`${inputClass} flex-1 text-xs py-2.5 px-4`}
-              />
-              <button
-                type="submit"
-                disabled={!text.trim() || sending}
-                className={`${primaryBtn} py-2.5 px-3 shrink-0 rounded-lg`}
-                aria-label="Send message"
-              >
-                <HiPaperAirplane className="rotate-90 text-sm" />
-              </button>
-            </form>
+            {/* Input Composer & Preview Container */}
+            <div className="bg-[var(--surface)] border-t border-[var(--border)] p-3 flex flex-col gap-2 shrink-0">
+              
+              {/* Image Preview Box */}
+              {imagePreview && (
+                <div className="relative self-start border border-[var(--border)] rounded-lg p-1 bg-[var(--surface-2)]">
+                  <img src={imagePreview} alt="Preview" className="h-16 w-16 object-cover rounded-md" />
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute -top-1.5 -right-1.5 bg-neutral-900 text-white rounded-full p-0.5 hover:bg-neutral-800 transition-colors shadow-sm cursor-pointer"
+                    aria-label="Remove image"
+                  >
+                    <HiX className="text-[10px]" />
+                  </button>
+                </div>
+              )}
+
+              {/* Form */}
+              <form onSubmit={handleSend} className="flex items-center gap-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  className="hidden"
+                  id="chat-image-picker"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={sending}
+                  className="p-2.5 rounded-lg text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors shrink-0 cursor-pointer"
+                  aria-label="Select photo"
+                >
+                  <HiPhotograph className="text-lg" />
+                </button>
+                
+                <input
+                  type="text"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder={imagePreview ? "Add a caption..." : `Message @${activeChatUser?.username || 'user'}...`}
+                  disabled={sending}
+                  className={`${inputClass} flex-1 text-xs py-2.5 px-4`}
+                />
+                
+                <button
+                  type="submit"
+                  disabled={(!text.trim() && !imageFile) || sending}
+                  className={`${primaryBtn} py-2.5 px-3 shrink-0 rounded-lg`}
+                  aria-label="Send message"
+                >
+                  <HiPaperAirplane className="rotate-90 text-sm" />
+                </button>
+              </form>
+            </div>
           </>
         ) : (
           /* Select convo empty state */

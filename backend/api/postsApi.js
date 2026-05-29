@@ -621,6 +621,41 @@ postApp.patch('/:id/restore', protect, validateObjectIdParam('id'), async (req, 
   } catch (err) { next(err) }
 })
 
+// Permanent delete post (protected — own post only)
+postApp.delete('/:id', protect, validateObjectIdParam('id'), async (req, res, next) => {
+  try {
+    const post = await Post.findById(req.params.id)
+    if (!post) return res.status(404).json({ message: 'Post not found' })
+
+    if (post.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to delete this post' })
+    }
+
+    // Delete image from Cloudinary if it exists
+    if (post.imagePublicId) {
+      try {
+        await deleteCloudinaryImage(post.imagePublicId)
+      } catch (cloudinaryErr) {
+        console.warn(`Failed to delete Cloudinary image: ${cloudinaryErr.message}`)
+      }
+    }
+
+    if (!post.isDeleted) {
+      await User.findByIdAndUpdate(req.user._id, { $inc: { postsCount: -1 } })
+    }
+
+    // Clean up related database documents
+    await Promise.all([
+      Comment.deleteMany({ post: post._id }),
+      Like.deleteMany({ post: post._id }),
+      Bookmark.deleteMany({ post: post._id })
+    ])
+
+    await Post.findByIdAndDelete(post._id)
+    res.status(200).json({ message: 'post permanently deleted' })
+  } catch (err) { next(err) }
+})
+
 // Home Feed (kept for backward compatibility, mapped to for-you)
 postApp.get('/', protect, async (req, res, next) => {
   try {

@@ -26,4 +26,5 @@ export const likePost       = (id)        => api.post(`/posts/${id}/like`)
 export const softDeletePost = (id)        => api.patch(`/posts/${id}`)
 export const getArchivedPosts = ()        => api.get('/posts/archives/user')
 export const restorePost    = (id)        => api.patch(`/posts/${id}/restore`)
+export const deletePost     = (id)        => api.delete(`/posts/${id}`)
 

@@ -6,11 +6,11 @@
  * restoring them back into the active feed.
  */
 import { useState, useEffect } from 'react'
-import { getArchivedPosts, restorePost } from '../services/postService'
+import { getArchivedPosts, restorePost, deletePost } from '../services/postService'
 import { getArchivedComments, restoreComment } from '../services/commentService'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import EmptyState from '../components/common/EmptyState'
-import { HiRefresh } from 'react-icons/hi'
+import { HiRefresh, HiTrash } from 'react-icons/hi'
 import {
   pageTitleClass, pageSubtitle, tabsContainer, tab, tabActive,
   archiveCard, restoreBtn, mutedText, postContent
@@ -49,6 +49,19 @@ const Archives = () => {
       toast.success('Post restored!')
     } catch {
       toast.error('Failed to restore post')
+    }
+  }
+
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm('Are you sure you want to permanently delete this post? This action cannot be undone.')) {
+      return
+    }
+    try {
+      await deletePost(postId)
+      setPosts(posts.filter((p) => p._id !== postId))
+      toast.success('Post permanently deleted!')
+    } catch {
+      toast.error('Failed to delete post')
     }
   }
 
@@ -100,10 +113,20 @@ const Archives = () => {
                   <span className="text-[12px] font-medium text-[var(--muted)] tabular-nums tracking-wide">
                     Archived {new Date(post.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
-                  <button onClick={() => handleRestorePost(post._id)} aria-label="Restore post" className={restoreBtn}>
-                    <HiRefresh className="text-sm" />
-                    Restore
-                  </button>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleRestorePost(post._id)} aria-label="Restore post" className={restoreBtn}>
+                      <HiRefresh className="text-sm" />
+                      Restore
+                    </button>
+                    <button
+                      onClick={() => handleDeletePost(post._id)}
+                      aria-label="Delete post permanently"
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[var(--danger)] bg-[var(--danger-soft)] border border-[color:color-mix(in_srgb,var(--danger)_20%,var(--border))] hover:opacity-90 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+                    >
+                      <HiTrash className="text-sm" />
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

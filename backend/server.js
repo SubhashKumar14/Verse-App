@@ -20,6 +20,7 @@ import { postApp }    from './api/postsApi.js'
 import { commentApp } from './api/commentsApi.js'
 import { commonApp }  from './api/commonApi.js'
 import { notificationsApp } from './api/notificationsApi.js'
+import { messagesApp } from './api/messagesApi.js'
 import dotenv from 'dotenv'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -58,6 +59,7 @@ app.use('/api/posts',    postApp)
 app.use('/api/comments', commentApp)
 app.use('/api/common',   commonApp)   // auth: register, login, logout, me
 app.use('/api/notifications', notificationsApp)
+app.use('/api/messages', messagesApp)
 
 // ─── Health check ─────────────────────────────────────────────────────────
 app.get('/', (req, res) => res.json({ message: 'Threadly API is running' }))
